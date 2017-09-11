@@ -1,0 +1,100 @@
+# This config is meant to be consumed by the config transpiler, which will
+# generate the corresponding Ignition config. Do not pass this config directly
+# to instances of Container Linux.
+
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqtK80wInbOIbvuf3EhANdJxwMJTjm29E0PgxjEishZ0x9Wj+EmL3WvvZf7YFrB3IuJ0bMI7Cjq5ZpSPZ+qEZgTfm4oKZgKJsnnynFibeizH2aN9YgbdIJeIiE0kF6v/fFVQEtIwX5oO3TUMYBP7Mecl+nRibudAX/TK08oZzt4hdOrmbUZ5pmzaCSAfabqDRhi8r5GVVnEHcfGvKv7P+z+O4pySCURF/XozmjlPHv8hl4pqAx9eK6OylB/FH5+2jNIkG5vJMWs1bO4AdmE+mqeefHmn6CH55bNUGFH6Oqc4qGnRapjp5tdiaW4jc8DinLqw1ScEUraH+KjzqrN9mD xarth@shakuras
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8X2dOz+fN4HMeCJKe2SUdHzYMgovEUyjWPdl/GTOlli1wismrjWSsNhk4uv2sk64rWjp8gnUoPgMUJJJEi67lJRUH2Uj6syx6ySihuQ8GaWq7EiIyfOI/DwS1mEEOZ0HoMlS+GMqz9rpMIQ0x+c6Fq1hfAA578E1wf0neHgu97ndvv6NjKn48jUffHPvnFwC59pEi0BxgfEYUzp+AVv5/JGtWpByaxH57tn8WlGR0E+sz9YPaLI9WHUWhxbr5cp8GUClMSGpjKY7Zi1prkHeEt1lgp0C49bk052o669GxiAMNXzpiyHoacdQb8ydEFK0GZ58FMd7FiR8Jdsuftbll
+docker:
+  flags: 
+    - "--mtu 1454"
+    - "--dns 8.8.8.8"
+storage:
+  files:
+    - path: /etc/sysctl.d/ipv6.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          net.ipv6.conf.all.disable_ipv6=1
+          net.ipv6.conf.default.disable_ipv6=1
+    - path: /etc/fuse.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          user_allow_other
+
+locksmith:
+  reboot_strategy: "off"
+
+systemd:
+  units:
+    - name: setup-network-environment.service
+      enable: true
+      contents: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
+
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: docker.service
+      enable: true
+      contents: |
+        [Unit]
+        Requires=torcx.target
+        After=torcx.target
+        Description=Docker Application Container Engine
+        Documentation=http://docs.docker.com
+        After=containerd.service docker.socket network-online.target setup-network-environment.service
+        Wants=network-online.target
+        Requires=containerd.service docker.socket setup-network-environment.service
+        ConditionPathExists=/etc/network-environment
+
+        [Service]
+        EnvironmentFile=/run/metadata/torcx
+        EnvironmentFile=/etc/network-environment
+        Type=notify
+        EnvironmentFile=-/run/flannel/flannel_docker_opts.env
+        Environment=DOCKER_SELINUX=--selinux-enabled=true
+
+        # the default is not to use systemd for cgroups because the delegate issues still
+        # exists and systemd currently does not support the cgroup feature set required
+        # for containers run by docker
+        ExecStart=/usr/bin/env PATH=${TORCX_BINDIR}:${PATH} ${TORCX_BINDIR}/dockerd --host=tcp://${ETH1_IPV4} --host=fd:// --containerd=/var/run/docker/libcontainerd/docker-containerd.sock $DOCKER_SELINUX $DOCKER_OPTS $DOCKER_CGROUPS $DOCKER_OPT_BIP $DOCKER_OPT_MTU $DOCKER_OPT_IPMASQ
+        ExecReload=/bin/kill -s HUP $MAINPID
+        LimitNOFILE=1048576
+        # Having non-zero Limit*s causes performance problems due to accounting overhead
+        # in the kernel. We recommend using cgroups to do container-local accounting.
+        LimitNPROC=infinity
+        LimitCORE=infinity
+        # Uncomment TasksMax if your systemd version supports it.
+        # Only systemd 226 and above support this version.
+        TasksMax=infinity
+        TimeoutStartSec=0
+        # set delegate yes so that systemd does not reset the cgroups of docker containers
+        Delegate=yes
+        # kill only the docker process, not all processes in the cgroup
+        KillMode=process
+        # restart the docker process if it exits prematurely
+        Restart=on-failure
+        StartLimitBurst=3
+        StartLimitInterval=60s
+
+        [Install]
+        WantedBy=multi-user.target
