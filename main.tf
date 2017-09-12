@@ -101,6 +101,7 @@ resource "openstack_networking_subnet_v2"  "int_net_subnet" {
   cidr       = "192.168.149.0/24"
   ip_version = 4
   enable_dhcp = "true"
+  no_gateway = "true"
   dns_nameservers = ["141.142.2.2","141.142.230.144"]
 }
 
