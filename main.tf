@@ -86,15 +86,8 @@ resource "openstack_networking_router_v2" "ext_router" {
 }
 
 resource "openstack_networking_router_interface_v2" "ext_router_interface" {
-  router_id = "${openstack_networking_router_v2.ext_router.id}"
   subnet_id = "${openstack_networking_subnet_v2.ext_net_subnet.id}"
-}
-
-resource "openstack_networking_router_route_v2" "ext_route" {
-  depends_on       = ["openstack_networking_router_interface_v2.ext_router_interface"]
-  router_id        = "${openstack_networking_router_v2.ext_router.id}"
-  destination_cidr = "10.0.1.0/24"
-  next_hop         = "192.168.99.254"
+  router_id = "${openstack_networking_router_v2.ext_router.id}"
 }
 
 resource "openstack_networking_network_v2" "int_network" {
@@ -103,7 +96,7 @@ resource "openstack_networking_network_v2" "int_network" {
 }
 
 resource "openstack_networking_subnet_v2"  "int_net_subnet" {
-  name       = "WT-external_subnet"
+  name       = "WT-internal_subnet"
   network_id = "${openstack_networking_network_v2.int_network.id}"
   cidr       = "192.168.149.0/24"
   ip_version = 4
@@ -130,6 +123,7 @@ resource "openstack_networking_port_v2" "mgmt_port" {
   count              = "${var.num_slaves + 1}"
   network_id         = "${openstack_networking_network_v2.int_network.id}"
   admin_state_up     = "true"
+  security_group_ids = ["${openstack_networking_secgroup_v2.wt_node.id}"]
   fixed_ip {
     subnet_id = "${openstack_networking_subnet_v2.int_net_subnet.id}"
   }
@@ -140,8 +134,6 @@ resource "openstack_compute_instance_v2" "swarm_manager" {
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
-  security_groups = ["${openstack_networking_secgroup_v2.wt_node.name}",
-                     "${openstack_networking_secgroup_v2.wt_master.name}"]
   user_data = "${file("config.ign")}"
 
   network {
@@ -154,11 +146,11 @@ resource "openstack_compute_instance_v2" "swarm_manager" {
 }
 
 resource "openstack_networking_floatingip_v2" "swarm_manager_ip" {
-  depends_on = ["openstack_networking_router_interface_v2.ext_router_interface"]
   pool = "${var.pool}"
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip_master" {
+  depends_on = ["openstack_compute_instance_v2.swarm_manager"]
   floating_ip = "${openstack_networking_floatingip_v2.swarm_manager_ip.address}"
   instance_id = "${openstack_compute_instance_v2.swarm_manager.id}"
 }
@@ -169,8 +161,6 @@ resource "openstack_compute_instance_v2" "swarm_slave" {
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
-  security_groups = ["${openstack_networking_secgroup_v2.wt_node.name}",
-                     "${openstack_networking_secgroup_v2.wt_master.name}"]
   user_data = "${file("config.ign")}"
 
   network {
