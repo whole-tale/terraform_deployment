@@ -3,7 +3,7 @@ variable "region" {
 }
 
 variable "image" {
-    default = "Container-Linux (1451.2.0)"
+    default = "Container-Linux (1465.7.0)"
     description = "openstack image list : Name"
 }
 
