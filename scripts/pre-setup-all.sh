@@ -1,0 +1,12 @@
+#!/bin/bash
+
+docker network rm docker_gwbridge || /bin/true
+docker swarm leave --force
+
+# Create a default swarm bridge with proper MTU
+docker network create \
+  --opt com.docker.network.bridge.name=docker_gwbridge \
+  --opt com.docker.network.bridge.enable_icc=false \
+  --opt com.docker.network.bridge.enable_ip_masquerade=true \
+  --opt com.docker.network.driver.mtu=1454 \
+  docker_gwbridge

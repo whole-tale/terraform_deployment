@@ -17,3 +17,15 @@ resource "openstack_networking_port_v2" "mgmt_port" {
     subnet_id = "${openstack_networking_subnet_v2.int_net_subnet.id}"
   }
 }
+
+resource "openstack_networking_floatingip_v2" "swarm_slave_ip" {
+  count = "${var.num_slaves}"
+  pool = "${var.pool}"
+}
+
+resource "openstack_compute_floatingip_associate_v2" "fip_slave" {
+  count = "${var.num_slaves}"
+  depends_on = ["openstack_compute_instance_v2.swarm_slave"]
+  floating_ip = "${element(openstack_networking_floatingip_v2.swarm_slave_ip.*.address, count.index)}"
+  instance_id = "${element(openstack_compute_instance_v2.swarm_slave.*.id, count.index)}"
+}
