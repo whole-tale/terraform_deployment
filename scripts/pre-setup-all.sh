@@ -1,7 +1,7 @@
 #!/bin/bash
 
+docker swarm leave --force || /bin/true
 docker network rm docker_gwbridge || /bin/true
-docker swarm leave --force
 
 # Create a default swarm bridge with proper MTU
 docker network create \

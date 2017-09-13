@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Create a default swarm bridge with proper MTU
-( yes 1 | docker network rm ingres ) || true
-sleep 1  # because docker %#$@%
+echo "y" | docker network rm ingress <&0
+sleep 1
+docker network ls
 docker network create \
   -d overlay \
   --ingress \

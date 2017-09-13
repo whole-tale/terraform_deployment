@@ -17,7 +17,7 @@ resource "openstack_compute_instance_v2" "swarm_master" {
 /* trick for provisioning after we get a floating ip */
 
 resource "null_resource" "provision_master" {
-  depends_on = ["openstack_networking_floatingip_v2.swarm_master_ip"]
+  depends_on = ["openstack_compute_floatingip_associate_v2.fip_master"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
