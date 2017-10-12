@@ -12,6 +12,11 @@ $ ./ct -platform openstack-metadata -in-file coreos.yaml -out-file config.ign
 
 All the magic that needs to happen
 ==================================
+
+Requirements:
+
+* `*.dev` and `dev` subdomains pointing to head node
+
 ```bash
 $ docker network create --driver overlay -o "com.docker.network.driver.mtu"="1454" traefik-net
 $ docker network create --driver overlay -o "com.docker.network.driver.mtu"="1454" mongo
@@ -51,6 +56,8 @@ $ docker service create \
 
 # Manual db restore if needed ^^^
 
+# needs assets
+
 $ docker service create --name traefik \
     --constraint=node.role==manager \
     --publish 80:80 --publish 443:443 --publish 8080:8080 \
@@ -71,5 +78,51 @@ $ docker service create \
     --network traefik-net --network celery --network mongo \
     wholetale/girder:dev
 
-...
+$ docker run --privileged \
+    --name celery_worker \
+    --label traefik.enable=false \
+    -e GIRDER_API_URL=https://girder.dev.wholetale/api/v1 \
+    -e HOSTDIR=/host \
+    -v /var/run/docker.sock:/var/run/docker.sock:ro \
+    -v /:/host \
+    --device /dev/fuse \
+    --cap-add SYS_ADMIN \
+    --network celery \
+    -d --entrypoint=/usr/bin/python \
+    wholetale/gwvolman:dev \
+      -m girder_worker -l info \
+      -Q manager,$(docker info --format "{{.Swarm.NodeID}}") \
+      --hostname=$(docker info --format "{{.Swarm.NodeID}}")
+
+$ docker service create \
+    --replicas 1 \
+    --network traefik-net \
+    --label traefik.port=4200 \
+    --label traefik.docker.network=traefik-net \
+    --label traefik.frontend.passHostHeader=true \
+    --label traefik.enable=true \
+    --label traefik.frontend.entryPoints=https \
+    --name dashboard wholetale/dashboard
+
+# On slave nodes:
+$ sudo su
+$ mkdir /opt
+$ mount --bind /opt /usr/local
+$ docker run --privileged \
+    --name celery_worker \
+    --label traefik.enable=false \
+    -e GIRDER_API_URL=https://girder.dev.wholetale/api/v1 \
+    -e HOSTDIR=/host \
+    -v /var/run/docker.sock:/var/run/docker.sock:ro \
+    -v /:/host \
+    -v /tmp:/tmp \
+    --device /dev/fuse \
+    --cap-add SYS_ADMIN \
+    --network celery \
+    -d --entrypoint=/usr/bin/python \
+    wholetale/gwvolman:dev \
+      -m girder_worker -l info \
+      -Q celery,$(docker info --format "{{.Swarm.NodeID}}") \
+      --hostname=$(docker info --format "{{.Swarm.NodeID}}")
+$ docker cp celery_worker:/usr/local/ /usr
 ```
