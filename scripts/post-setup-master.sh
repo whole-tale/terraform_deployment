@@ -9,3 +9,6 @@ docker network create \
   --ingress \
   --opt com.docker.network.driver.mtu=1454 \
   ingress
+
+
+docker node update --label-add mongo.replica=1 $(docker info --format "{{.Swarm.NodeID}}")
