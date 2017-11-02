@@ -36,3 +36,18 @@ variable "num_slaves" {
     default = 3
     description = "Number of slave nodes"
 }
+
+variable "domain" {
+    default = "wholetale.org"
+    description = "Site domain name"
+}
+
+variable "globus_client_id" {
+    default = ""
+    description = "Globus client ID"
+}
+
+variable "globus_client_secret" {
+    default = ""
+    description = "Globus client secret"
+}
