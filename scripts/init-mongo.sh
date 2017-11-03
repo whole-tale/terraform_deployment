@@ -13,11 +13,10 @@ if [ -z "$container" ]; then
   exit 1;
 fi
 
-# Create replica set
-echo "Configuring replica set"
-docker exec -it $container mongo \
-    --eval 'rs.initiate({ _id: "rs1", members: [{ _id: 1, host: "wt_mongo1:27017" }, { _id: 2, host: "wt_mongo2:27017" }, { _id: 3, host: "wt_mongo3:27017" }], settings: { getLastErrorDefaults: { w: "majority", wtimeout: 30000 }}})'
 
+# Init replica set
+echo "Initializing replica set"
+docker exec -it $container mongo --eval 'rs.initiate( { _id : "rs1", members: [ { _id : 0, host : "wt_mongo1:27017" } ] })'
 
 # Import DB
 if [ ! -z "$restore_url" ]; then
@@ -30,6 +29,10 @@ if [ ! -z "$restore_url" ]; then
     docker exec $container rm girder_backup.tar.gz
 fi
 
+# Create replica set
+echo "Configuring replica set"
+docker exec -it $container mongo --eval 'rs.add("wt_mongo2:27017"); rs.add("wt_mongo3:27017")'
+
 
 # Update CORS origin
 if [ ! -z "$domain" ]; then
@@ -37,7 +40,7 @@ if [ ! -z "$domain" ]; then
    docker exec $container mongo girder --eval 'db.setting.updateOne( { key: "core.cors.allow_origin" }, { $set : { value: "http://localhost:4200, https://dashboard.wholetale.org, http://localhost:8000, https://dashboard-dev.wholetale.org, https://dashboard.'$domain'"}})'
 fi
 
-docker exec $container mongo girder --eval 'db.setting.updateOne( { name: "GridFS local" }, { $set : { mongohost: "mongodb://wt_mongo1:27017,wt_mongo2:27017,wt_mongo3:27017"}})'
+docker exec $container mongo girder --eval 'db.assetstore.updateOne( { name: "GridFS local" }, { $set : { mongohost: "mongodb://wt_mongo1:27017,wt_mongo2:27017,wt_mongo3:27017"}})'
 
 # Update Globus keys
 if [ ! -z "$globus_client_id" ]; then
