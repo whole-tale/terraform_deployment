@@ -103,7 +103,7 @@ services:
       replicas: 1
 
   dashboard:
-    image: wholetale/dashboard
+    image: wholetale/dashboard:stable
     networks:
       - traefik-net
     environment:
