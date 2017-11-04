@@ -6,6 +6,10 @@ globus_client_id=$2
 globus_client_secret=$3
 restore_url=$4
 
+
+# We should wait for the container to be ready, but for now just sleep
+sleep 60
+
 container=$(docker ps -qf label=com.docker.swarm.service.name=wt_mongo1)
 
 if [ -z "$container" ]; then
