@@ -25,7 +25,26 @@ resource "null_resource" "provision_master" {
   }
 
   provisioner "remote-exec" {
-    script = "./scripts/pre-setup-all.sh ${var.docker_mtu}"
+    inline = [
+      "mkdir -p /home/core/wholetale/"
+    ]
+  }
+
+  provisioner "file" {
+    source = "scripts/pre-setup-all.sh"
+    destination = "/home/core/wholetale/pre-setup-all.sh"
+  }
+
+  provisioner "file" {
+    source = "scripts/post-setup-master.sh"
+    destination = "/home/core/wholetale/post-setup-master.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/core/wholetale/pre-setup-all.sh",
+      "/home/core/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+    ]
   }
 
   provisioner "remote-exec" {
@@ -35,6 +54,9 @@ resource "null_resource" "provision_master" {
   }
 
   provisioner "remote-exec" {
-    script = "./scripts/post-setup-master.sh ${var.docker_mtu}"
+    inline = [
+      "chmod +x /home/core/wholetale/post-setup-master.sh",
+      "/home/core/wholetale/post-setup-master.sh ${var.docker_mtu}"
+    ]
   }
 }

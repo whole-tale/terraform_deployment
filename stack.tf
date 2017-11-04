@@ -11,6 +11,7 @@ data "template_file" "stack" {
 
   vars {
     domain = "${var.domain}"
+    mtu = "${var.docker_mtu}"
   }
 }
 
@@ -45,7 +46,7 @@ resource "null_resource" "deploy_stack" {
 
   provisioner "file" {
     source = "assets/traefik/acme/acme.json"
-    destination = "/home/core/wholetale/traefik/acme"
+    destination = "/home/core/wholetale/traefik/acme/acme.json"
   }
 
   provisioner "file" {
@@ -76,15 +77,15 @@ resource "null_resource" "deploy_stack" {
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/init-mongo.sh"
-#      "/home/core/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret} ${var.restore_url}"
+      "chmod +x /home/core/wholetale/init-mongo.sh",
+      "/home/core/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret} ${var.restore_url}"
     ]
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/start-worker.sh"
-#      "/home/core/wholetale/start-worker.sh ${var.domain} manager"
+      "chmod +x /home/core/wholetale/start-worker.sh",
+      "/home/core/wholetale/start-worker.sh ${var.domain} manager"
     ]
   }
 }
@@ -112,8 +113,8 @@ resource "null_resource" "start_worker" {
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/start-worker.sh"
-#      "/home/core/wholetale/start-worker.sh ${var.domain} celery"
+      "chmod +x /home/core/wholetale/start-worker.sh",
+      "/home/core/wholetale/start-worker.sh ${var.domain} celery"
     ]
   }
 }

@@ -4,15 +4,15 @@ networks:
   traefik-net:
     driver: overlay
     driver_opts:
-      com.docker.network.driver.mtu: 1450
+      com.docker.network.driver.mtu: ${mtu}
   mongo:
     driver: overlay
     driver_opts:
-      com.docker.network.driver.mtu: 1450
+      com.docker.network.driver.mtu: ${mtu}
   celery:
     driver: overlay
     driver_opts:
-      com.docker.network.driver.mtu: 1450
+      com.docker.network.driver.mtu: ${mtu}
     attachable: true
 
 volumes:
@@ -78,7 +78,7 @@ services:
         constraints:
           - node.labels.mongo.replica == 3
   girder:
-    image: wholetale/girder:dev
+    image: xarthisius/girder:rescue
     networks:
       - celery
       - traefik-net
