@@ -25,7 +25,7 @@ resource "null_resource" "provision_master" {
   }
 
   provisioner "remote-exec" {
-    script = "./scripts/pre-setup-all.sh"
+    script = "./scripts/pre-setup-all.sh ${var.docker_mtu}"
   }
 
   provisioner "remote-exec" {
@@ -35,6 +35,6 @@ resource "null_resource" "provision_master" {
   }
 
   provisioner "remote-exec" {
-    script = "./scripts/post-setup-master.sh"
+    script = "./scripts/post-setup-master.sh ${var.docker_mtu}"
   }
 }
