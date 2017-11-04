@@ -7,15 +7,20 @@ globus_client_secret=$3
 restore_url=$4
 
 
-# We should wait for the container to be ready, but for now just sleep
-sleep 60
-
+# Wait for wt_mongo1 container
 container=$(docker ps -qf label=com.docker.swarm.service.name=wt_mongo1)
 
-if [ -z "$container" ]; then
-  echo "Couldn't find wt_mongo1, container exiting"
-  exit 1;
-fi
+i=1
+while [ -z "$container" ]; do
+  container=$(docker ps -qf label=com.docker.swarm.service.name=wt_mongo1)
+  echo "Waiting for wt_mongo1 to start (retry $i)"
+  sleep 30
+  ((i++))
+  if [ $i -gt 10 ]; then
+     echo "Timeout waiting for wt_mongo1"
+     exit 1;
+  fi
+done
 
 
 # Init replica set
