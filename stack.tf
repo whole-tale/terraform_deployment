@@ -71,6 +71,7 @@ resource "null_resource" "deploy_stack" {
 
   provisioner "remote-exec" {
     inline = [
+      "chmod 600 /home/core/wholetale/traefik/acme/acme.json",
       "docker stack deploy --compose-file /home/core/wholetale/swarm-compose.yaml wt"
     ]
   }
