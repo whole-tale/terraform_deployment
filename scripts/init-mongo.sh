@@ -25,7 +25,8 @@ if [ ! -z "$restore_url" ]; then
     docker cp girder_backup.tar.gz $container:.
     docker exec $container mkdir /restore
     docker exec $container tar -xvf girder_backup.tar.gz -C /restore
-    docker exec $container mongorestore --drop /restore
+    docker exec $container mongorestore --drop --db=girder /restore/girder
+    docker exec $container mongorestore --drop --db=assetstore /restore/assetstore
     docker exec $container rm girder_backup.tar.gz
 fi
 

@@ -56,3 +56,8 @@ variable "globus_client_secret" {
     default = ""
     description = "Globus client secret"
 }
+
+variable "restore_url" {
+    default = ""
+    description = "Mongo DB restore URL"
+}
