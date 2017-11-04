@@ -1,6 +1,7 @@
 #!/bin/sh
 
 domain=$1 
+role=$2
 
 docker run --privileged \
     --name celery_worker \
@@ -16,5 +17,5 @@ docker run --privileged \
     -d --entrypoint=/usr/bin/python \
     wholetale/gwvolman \
       -m girder_worker -l info \
-      -Q manager,$(docker info --format "{{.Swarm.NodeID}}") \
+      -Q ${role},$(docker info --format "{{.Swarm.NodeID}}") \
       --hostname=$(docker info --format "{{.Swarm.NodeID}}")

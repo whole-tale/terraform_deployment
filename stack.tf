@@ -44,6 +44,11 @@ resource "null_resource" "deploy_stack" {
   }
 
   provisioner "file" {
+    source = "assets/traefik/acme/acme.json"
+    destination = "/home/core/wholetale/traefik/acme"
+  }
+
+  provisioner "file" {
     content = "${data.template_file.stack.rendered}"
     destination = "/home/core/wholetale/swarm-compose.yaml"
   }
@@ -59,8 +64,8 @@ resource "null_resource" "deploy_stack" {
   }
 
   provisioner "file" {
-    source = "scripts/mongo.sh"
-    destination = "/home/core/wholetale/mongo.sh"
+    source = "scripts/init-mongo.sh"
+    destination = "/home/core/wholetale/init-mongo.sh"
   }
 
   provisioner "remote-exec" {
@@ -71,15 +76,44 @@ resource "null_resource" "deploy_stack" {
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/init-mongo.sh
-      "/home/core/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret} ${var.restore_url}"
+      "chmod +x /home/core/wholetale/init-mongo.sh"
+#      "/home/core/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret} ${var.restore_url}"
     ]
   }
 
-#  provisioner "remote-exec" {
-#    inline = [
-#      "chmod +x /home/core/wholetale/start-worker.sh"
-#      "/home/core/wholetale/start-worker.sh ${var.domain}"
-#    ]
-#  }
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/core/wholetale/start-worker.sh"
+#      "/home/core/wholetale/start-worker.sh ${var.domain} manager"
+    ]
+  }
+}
+
+
+resource "null_resource" "start_worker" {
+  count = "${var.num_slaves}"
+  depends_on = ["null_resource.deploy_stack"]
+  connection {
+    user = "${var.ssh_user_name}"
+    private_key = "${file("${var.ssh_key_file}")}"
+    host = "${element(openstack_networking_floatingip_v2.swarm_slave_ip.*.address, count.index)}"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /home/core/wholetale/"
+    ]
+  }
+
+  provisioner "file" {
+    source = "scripts/start-worker.sh"
+    destination = "/home/core/wholetale/start-worker.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/core/wholetale/start-worker.sh"
+#      "/home/core/wholetale/start-worker.sh ${var.domain} celery"
+    ]
+  }
 }
