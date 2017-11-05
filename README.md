@@ -20,7 +20,8 @@ If not available on your system, download the alpha channel CoreOS image and add
 
 ```bash
 wget https://alpha.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2
-glance image-create --name "Container-Linux (1576.1.0)" --container-format bare --disk-format qcow2 --file coreos_production_openstack_image.img
+glance image-create --name "Container-Linux (1576.1.0)" --container-format bare --disk-format qcow2 \
+       --file coreos_production_openstack_image.img
 ```
 
 ## Globus authentication
