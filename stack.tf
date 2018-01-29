@@ -27,6 +27,19 @@ resource "null_resource" "label_nodes" {
   provisioner "remote-exec" {
     script = "./scripts/label-nodes.sh"
   }
+
+  provisioner "file" {
+    source = "./scripts/label-nodes.sh"
+    destination = "/tmp/label-nodes.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/label-nodes.sh",
+      "/tmp/label-nodes.sh ${var.cluster_name}-nfs"
+    ]
+  }
+
 }
 
 resource "null_resource" "deploy_stack" {
