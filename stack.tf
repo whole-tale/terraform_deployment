@@ -68,6 +68,11 @@ resource "null_resource" "deploy_stack" {
   }
 
   provisioner "file" {
+    source = "stacks/monitoring/monitoring.yaml"
+    destination = "/home/core/wholetale/monitoring.yaml"
+  }
+
+  provisioner "file" {
     content      = "${data.template_file.traefik.rendered}"
     destination = "/home/core/wholetale/traefik/traefik.toml"
   }
@@ -85,7 +90,8 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod 600 /home/core/wholetale/traefik/acme/acme.json",
-      "docker stack deploy --compose-file /home/core/wholetale/swarm-compose.yaml wt"
+      "docker stack deploy --compose-file /home/core/wholetale/swarm-compose.yaml wt",
+      "docker stack deploy --compose-file /home/core/wholetale/monitoring.yaml omd"
     ]
   }
 
