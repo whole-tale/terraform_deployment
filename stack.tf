@@ -24,10 +24,6 @@ resource "null_resource" "label_nodes" {
     host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
   }
 
-  provisioner "remote-exec" {
-    script = "./scripts/label-nodes.sh"
-  }
-
   provisioner "file" {
     source = "./scripts/label-nodes.sh"
     destination = "/tmp/label-nodes.sh"
