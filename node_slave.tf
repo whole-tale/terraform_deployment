@@ -8,7 +8,7 @@ data "external" "swarm_join_token" {
 
 resource "openstack_compute_instance_v2" "swarm_slave" {
   count = "${var.num_slaves}"
-  name = "${format("wt-prod-%02d", count.index + 1)}"
+  name = "${format("${var.cluster_name}-%02d", count.index + 1)}"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"

@@ -1,11 +1,11 @@
 resource "openstack_blockstorage_volume_v2" "fileserver" {
-  name = "wt-nfs"
+  name = "${var.cluster_name}-nfs-vol"
   description = "Shared volume"
   size = "${var.nfs_volume_size}"
 }
 
 resource "openstack_compute_instance_v2" "fileserver" {
-  name = "wt-nfs"
+  name = "${var.cluster_name}-nfs"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"

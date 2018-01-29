@@ -32,6 +32,11 @@ variable "pool" {
     description = "Network pool for assigning floating_ips"
 }
 
+variable "cluster_name" {
+    default = "wt-dev"
+    description = "Cluster name"
+}
+
 variable "num_slaves" {
     default = 3
     description = "Number of slave nodes"
