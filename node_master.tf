@@ -64,3 +64,11 @@ resource "null_resource" "provision_master" {
     ]
   }
 }
+
+data "external" "swarm_join_token" {
+  depends_on = ["null_resource.provision_master"]
+  program = ["./scripts/get-token.sh"]
+  query = {
+    host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
+  }
+}

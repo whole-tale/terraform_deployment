@@ -45,6 +45,24 @@ resource "null_resource" "provision_fileserver" {
   }
 
   provisioner "file" {
+    source = "scripts/pre-setup-all.sh"
+    destination = "/home/core/wholetale/pre-setup-all.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/core/wholetale/pre-setup-all.sh",
+      "/home/core/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "docker swarm join --token ${data.external.swarm_join_token.result.worker} ${openstack_compute_instance_v2.swarm_master.access_ip_v4}"
+    ]
+  }
+
+  provisioner "file" {
     source = "scripts/nfs-init.sh"
     destination = "/home/core/wholetale/nfs-init.sh"
   }
