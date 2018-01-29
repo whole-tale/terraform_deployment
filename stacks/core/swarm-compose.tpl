@@ -78,7 +78,7 @@ services:
         constraints:
           - node.labels.mongo.replica == 3
   girder:
-    image: xarthisius/girder:rescue
+    image: wholetale/girder:latest
     networks:
       - celery
       - traefik-net
@@ -92,7 +92,11 @@ services:
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
         - "traefik.frontend.entryPoints=https"
-
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.storage == 1
   redis:
     image: redis
     networks:
