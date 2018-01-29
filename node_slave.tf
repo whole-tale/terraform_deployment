@@ -33,6 +33,10 @@ resource "null_resource" "provision_slave" {
   }
 
   provisioner "remote-exec" {
+    inline = ["sudo hostnamectl set-hostname ${element(openstack_compute_instance_v2.swarm_slave.*.name, count.index)}"]
+  }
+
+  provisioner "remote-exec" {
     inline = [
       "mkdir -p /home/core/wholetale/"
     ]

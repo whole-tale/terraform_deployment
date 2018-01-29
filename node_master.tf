@@ -25,6 +25,10 @@ resource "null_resource" "provision_master" {
   }
 
   provisioner "remote-exec" {
+    inline = ["sudo hostnamectl set-hostname ${openstack_compute_instance_v2.swarm_master.name}"]
+  }
+
+  provisioner "remote-exec" {
     inline = [
       "mkdir -p /home/core/wholetale/"
     ]

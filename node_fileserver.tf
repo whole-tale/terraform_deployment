@@ -33,6 +33,11 @@ resource "null_resource" "provision_fileserver" {
     host = "${openstack_networking_floatingip_v2.fileserver_ip.address}"
   }
 
+
+  provisioner "remote-exec" {
+    inline = ["sudo hostnamectl set-hostname ${openstack_compute_instance_v2.fileserver.name}"]
+  }
+
   provisioner "remote-exec" {
     inline = [
       "mkdir -p /home/core/wholetale/"
