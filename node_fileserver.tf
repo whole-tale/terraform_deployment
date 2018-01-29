@@ -1,11 +1,17 @@
-resource "openstack_blockstorage_volume_v2" "fileserver" {
-  name = "wt-nfs"
-  description = "Shared volume"
+resource "openstack_blockstorage_volume_v2" "homes-vol" {
+  name = "${var.cluster_name}-homes-vol"
+  description = "Shared volume for home directories"
+  size = "${var.nfs_volume_size}"
+}
+
+resource "openstack_blockstorage_volume_v2" "registry-vol" {
+  name = "${var.cluster_name}-registry-vol"
+  description = "Shared volume for Docker registry"
   size = "${var.nfs_volume_size}"
 }
 
 resource "openstack_compute_instance_v2" "fileserver" {
-  name = "wt-nfs"
+  name = "${var.cluster_name}-nfs"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
@@ -20,13 +26,20 @@ resource "openstack_compute_instance_v2" "fileserver" {
   }
 }
 
-resource "openstack_compute_volume_attach_v2" "fileserver" {
+resource "openstack_compute_volume_attach_v2" "homes-vol" {
+  depends_on = ["openstack_compute_instance_v2.fileserver"]
   instance_id = "${openstack_compute_instance_v2.fileserver.id}"
-  volume_id   = "${openstack_blockstorage_volume_v2.fileserver.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.homes-vol.id}"
+}
+
+resource "openstack_compute_volume_attach_v2" "registry-vol" {
+  depends_on = ["openstack_compute_instance_v2.fileserver"]
+  instance_id = "${openstack_compute_instance_v2.fileserver.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.registry-vol.id}"
 }
 
 resource "null_resource" "provision_fileserver" {
-  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver"]
+  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_master", "openstack_compute_volume_attach_v2.homes-vol", "openstack_compute_volume_attach_v2.registry-vol"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
@@ -34,8 +47,30 @@ resource "null_resource" "provision_fileserver" {
   }
 
   provisioner "remote-exec" {
+    inline = ["sudo hostnamectl set-hostname ${openstack_compute_instance_v2.fileserver.name}"]
+  }
+
+  provisioner "remote-exec" {
     inline = [
       "mkdir -p /home/core/wholetale/"
+    ]
+  }
+
+  provisioner "file" {
+    source = "scripts/pre-setup-all.sh"
+    destination = "/home/core/wholetale/pre-setup-all.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/core/wholetale/pre-setup-all.sh",
+      "/home/core/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "docker swarm join --token ${data.external.swarm_join_token.result.worker} ${openstack_compute_instance_v2.swarm_master.access_ip_v4}"
     ]
   }
 
@@ -51,4 +86,9 @@ resource "null_resource" "provision_fileserver" {
     ]
   }
 
+
+#  provisioner "remote-exec" {
+#    inline = ["sudo umount -A"]
+#    when   = "destroy"
+#  }
 }

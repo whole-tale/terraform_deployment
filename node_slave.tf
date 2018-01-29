@@ -1,14 +1,6 @@
-data "external" "swarm_join_token" {
-  depends_on = ["null_resource.provision_master"]
-  program = ["./scripts/get-token.sh"]
-  query = {
-    host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
-  }
-}
-
 resource "openstack_compute_instance_v2" "swarm_slave" {
   count = "${var.num_slaves}"
-  name = "${format("wt-prod-%02d", count.index + 1)}"
+  name = "${format("${var.cluster_name}-%02d", count.index + 1)}"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
@@ -25,11 +17,15 @@ resource "openstack_compute_instance_v2" "swarm_slave" {
 
 resource "null_resource" "provision_slave" {
   count = "${var.num_slaves}"
-  depends_on = ["openstack_networking_floatingip_v2.swarm_slave_ip"]
+  depends_on = ["openstack_networking_floatingip_v2.swarm_slave_ip", "null_resource.provision_master"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
     host = "${element(openstack_networking_floatingip_v2.swarm_slave_ip.*.address, count.index)}"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["sudo hostnamectl set-hostname ${element(openstack_compute_instance_v2.swarm_slave.*.name, count.index)}"]
   }
 
   provisioner "remote-exec" {

@@ -21,7 +21,7 @@ resource "openstack_networking_floatingip_v2" "fileserver_ip" {
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip_fileserver" {
-  depends_on = ["openstack_compute_instance_v2.fileserver"]
+  depends_on = ["openstack_compute_instance_v2.fileserver", "openstack_networking_port_v2.fileserver_ext_port"]
   floating_ip = "${openstack_networking_floatingip_v2.fileserver_ip.address}"
   instance_id = "${openstack_compute_instance_v2.fileserver.id}"
 }

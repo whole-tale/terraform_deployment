@@ -80,12 +80,29 @@ if [ ! -d ${mount_path} ]; then
    mkdir -p ${mount_path}
 fi
 
+# Create systemd mount file
+cat << EOF >  /etc/systemd/system/mnt.mount
+[Unit]
+Description=Mount $device on $mount_path
+After=local-fs.target
+
+[Mount]
+What=$device
+Where=$mount_path
+Type=ext4
+Options=noatime
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
 # Mount device to specified path
 if  ! mount | grep "^${device} " > /dev/null ; then
    if [ $verbose ]; then
       echo "Mounting ${device} to ${mount_path}"
    fi
-   mount ${device} ${mount_path}
+   systemctl start mnt.mount
 else
    echo "${device} already mounted"
 fi

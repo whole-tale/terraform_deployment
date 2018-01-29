@@ -1,5 +1,5 @@
 resource "openstack_compute_instance_v2" "swarm_master" {
-  name = "wt-prod-00"
+  name = "${var.cluster_name}-00"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
@@ -22,6 +22,10 @@ resource "null_resource" "provision_master" {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
     host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["sudo hostnamectl set-hostname ${openstack_compute_instance_v2.swarm_master.name}"]
   }
 
   provisioner "remote-exec" {
@@ -58,5 +62,13 @@ resource "null_resource" "provision_master" {
       "chmod +x /home/core/wholetale/post-setup-master.sh",
       "/home/core/wholetale/post-setup-master.sh ${var.docker_mtu}"
     ]
+  }
+}
+
+data "external" "swarm_join_token" {
+  depends_on = ["null_resource.provision_master"]
+  program = ["./scripts/get-token.sh"]
+  query = {
+    host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
   }
 }

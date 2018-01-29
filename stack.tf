@@ -24,9 +24,18 @@ resource "null_resource" "label_nodes" {
     host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
   }
 
-  provisioner "remote-exec" {
-    script = "./scripts/label-nodes.sh"
+  provisioner "file" {
+    source = "./scripts/label-nodes.sh"
+    destination = "/tmp/label-nodes.sh"
   }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/label-nodes.sh",
+      "/tmp/label-nodes.sh ${var.cluster_name}-nfs"
+    ]
+  }
+
 }
 
 resource "null_resource" "deploy_stack" {
@@ -55,6 +64,11 @@ resource "null_resource" "deploy_stack" {
   }
 
   provisioner "file" {
+    source = "stacks/monitoring/monitoring.yaml"
+    destination = "/home/core/wholetale/monitoring.yaml"
+  }
+
+  provisioner "file" {
     content      = "${data.template_file.traefik.rendered}"
     destination = "/home/core/wholetale/traefik/traefik.toml"
   }
@@ -72,7 +86,8 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod 600 /home/core/wholetale/traefik/acme/acme.json",
-      "docker stack deploy --compose-file /home/core/wholetale/swarm-compose.yaml wt"
+      "docker stack deploy --compose-file /home/core/wholetale/swarm-compose.yaml wt",
+      "docker stack deploy --compose-file /home/core/wholetale/monitoring.yaml omd"
     ]
   }
 
