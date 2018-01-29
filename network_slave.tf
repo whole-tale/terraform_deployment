@@ -25,7 +25,7 @@ resource "openstack_networking_floatingip_v2" "swarm_slave_ip" {
 
 resource "openstack_compute_floatingip_associate_v2" "fip_slave" {
   count = "${var.num_slaves}"
-  depends_on = ["openstack_compute_instance_v2.swarm_slave"]
+  depends_on = ["openstack_compute_instance_v2.swarm_slave", "openstack_networking_port_v2.ext_port"]
   floating_ip = "${element(openstack_networking_floatingip_v2.swarm_slave_ip.*.address, count.index)}"
   instance_id = "${element(openstack_compute_instance_v2.swarm_slave.*.id, count.index)}"
 }
