@@ -74,4 +74,9 @@ resource "null_resource" "provision_fileserver" {
     ]
   }
 
+  provisioner "remote-exec" {
+    inline = ["sudo umount -A"]
+    when   = "destroy"
+  }
+
 }
