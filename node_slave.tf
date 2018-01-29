@@ -17,7 +17,7 @@ resource "openstack_compute_instance_v2" "swarm_slave" {
 
 resource "null_resource" "provision_slave" {
   count = "${var.num_slaves}"
-  depends_on = ["openstack_networking_floatingip_v2.swarm_slave_ip"]
+  depends_on = ["openstack_networking_floatingip_v2.swarm_slave_ip", "null_resource.provision_master"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"

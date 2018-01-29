@@ -26,7 +26,7 @@ resource "openstack_compute_volume_attach_v2" "fileserver" {
 }
 
 resource "null_resource" "provision_fileserver" {
-  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver"]
+  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_master", "openstack_compute_volume_attach_v2.fileserver"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
