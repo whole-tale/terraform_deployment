@@ -22,9 +22,9 @@ $ docker network create --driver overlay -o "com.docker.network.driver.mtu"="145
 $ docker network create --driver overlay -o "com.docker.network.driver.mtu"="1454" mongo
 $ docker network create --driver overlay -o "com.docker.network.driver.mtu"="1454" --attachable celery
 $ docker node ls
-$ docker node update --label-add mongo.replica=1 ekyc8kh9a6e680bsdh3087c67
-$ docker node update --label-add mongo.replica=2 uqiwamfpqo41segqz6f8s954z
-$ docker node update --label-add mongo.replica=3 dog0pdne1gtig53vwks993vx1
+$ docker node update --label-add mongo.replica=1 --label-add core=1 ekyc8kh9a6e680bsdh3087c67
+$ docker node update --label-add mongo.replica=2 --label-add core=1 uqiwamfpqo41segqz6f8s954z
+$ docker node update --label-add mongo.replica=3 --label-add core=1 dog0pdne1gtig53vwks993vx1
 
 $ ssh $(docker node inspect ekyc8kh9a6e680bsdh3087c67 -f "{{.Status.Addr}}") docker volume create mongodata1
 $ ssh $(docker node inspect ekyc8kh9a6e680bsdh3087c67 -f "{{.Status.Addr}}") docker volume create mongoconfig1
@@ -67,10 +67,11 @@ $ docker service create --name traefik \
     --network traefik-net traefik
 
 $ docker service create \
-    --replicas 1 --network celery --name redis --label traefik.enable=false redis
+    --constraint 'node.labels.core == 1' --replicas 1 --network celery --name redis --label traefik.enable=false redis
 
 $ docker service create \
     --name girder --label traefik.port=8080 \
+    --constraint 'node.labels.core == 1' \
     --label traefik.docker.network=traefik-net \
     --label traefik.frontend.passHostHeader=true \
     --label traefik.enable=true \
@@ -81,12 +82,13 @@ $ docker service create \
 $ docker run --privileged \
     --name celery_worker \
     --label traefik.enable=false \
-    -e GIRDER_API_URL=https://girder.dev.wholetale/api/v1 \
+    -e GIRDER_API_URL=https://girder.wholetale.xyz/api/v1 \
     -e HOSTDIR=/host \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/host \
     --device /dev/fuse \
     --cap-add SYS_ADMIN \
+    --cap-add SYS_PTRACE \
     --network celery \
     -d --entrypoint=/usr/bin/python \
     wholetale/gwvolman:dev \
@@ -97,12 +99,14 @@ $ docker run --privileged \
 $ docker service create \
     --replicas 1 \
     --network traefik-net \
-    --label traefik.port=4200 \
+    --constraint 'node.labels.core == 1' \
+    -e GIRDER_API_URL=https://girder.wholetale.xyz \
+    --label traefik.port=80 \
     --label traefik.docker.network=traefik-net \
     --label traefik.frontend.passHostHeader=true \
     --label traefik.enable=true \
     --label traefik.frontend.entryPoints=https \
-    --name dashboard wholetale/dashboard
+    --name dashboard wholetale/dashboard    # or :stable
 
 # On slave nodes:
 $ sudo su
@@ -111,13 +115,14 @@ $ mount --bind /opt /usr/local
 $ docker run --privileged \
     --name celery_worker \
     --label traefik.enable=false \
-    -e GIRDER_API_URL=https://girder.dev.wholetale/api/v1 \
+    -e GIRDER_API_URL=https://girder.wholetale.xyz/api/v1 \
     -e HOSTDIR=/host \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/host \
     -v /tmp:/tmp \
     --device /dev/fuse \
     --cap-add SYS_ADMIN \
+    --cap-add SYS_PTRACE \
     --network celery \
     -d --entrypoint=/usr/bin/python \
     wholetale/gwvolman:dev \
