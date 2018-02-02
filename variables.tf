@@ -32,7 +32,42 @@ variable "pool" {
     description = "Network pool for assigning floating_ips"
 }
 
+variable "cluster_name" {
+    default = "wt-dev"
+    description = "Cluster name"
+}
+
 variable "num_slaves" {
     default = 3
     description = "Number of slave nodes"
+}
+
+variable "docker_mtu" {
+    default = "1454"
+    description = "Docker MTU"
+}
+
+variable "domain" {
+    default = "wholetale.org"
+    description = "Site domain name"
+}
+
+variable "globus_client_id" {
+    default = ""
+    description = "Globus client ID"
+}
+
+variable "globus_client_secret" {
+    default = ""
+    description = "Globus client secret"
+}
+
+variable "restore_url" {
+    default = ""
+    description = "Mongo DB restore URL"
+}
+
+variable "nfs_volume_size" {
+    default =  40
+    description = "Fileserver volume size in GB"
 }

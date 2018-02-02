@@ -1,133 +1,81 @@
-Kacper's random notes
-=====================
+# Whole Tale Terraform Deployment
 
-Converting yaml to ign:
+The following describes the basic process for deploying the Whole Tale services via Terraform.
 
+## What you'll need
+These are detailed below, but in short:
+* OpenStack project with API access (and the default MTU)
+* CoreOS image with at least Docker 17.09-ce (likely from [Alpha channel](https://alpha.release.core-os.net/amd64-usr/current/)).
+* [CoreOS Config Transpiler](https://github.com/coreos/container-linux-config-transpiler)
+* Wildcard DNS for your domain
+* [Globus Auth client ID and secret](https://auth.globus.org/v2/web/developers)
+
+
+## OpenStack
+The deployment process currently requires access to an OpenStack project with API access and has been tested on [NCSA Nebula](nebula.ncsa.illinois.edu) and [XSEDE Jetstream](https://portal.xsede.org/jetstream).
+
+## Uploading image via glance
+
+If not available on your system, download the alpha channel CoreOS image and add to OpenStack using the ``glance`` client:
+
+```bash
+wget https://alpha.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2
+glance image-create --name "Container-Linux (1576.1.0)" --container-format bare --disk-format qcow2 \
+       --file coreos_production_openstack_image.img
+```
+
+## Globus authentication
+The ``globus_client_id`` and ``globus_client_secret`` can be obtained by setting up a custom application/service via the [Globus Auth developer tools](https://auth.globus.org/v2/web/developers).
+
+
+## CoreOS Ignition
+The deployment process uses CoreOS [Ignition](https://coreos.com/ignition/docs/latest/) to override some setting during the initial image boot process. This includes injecting authorized keys into instances and some settings including MTU and default nameserver.  Settings are stored in ``coreos.yaml``.
+
+You'll need to download the config transpiler and add it to your ``PATH``:
 ```bash
 $ wget https://github.com/coreos/container-linux-config-transpiler/releases/download/v0.3.1/ct-v0.3.1-x86_64-unknown-linux-gnu
 $ mv ct-v0.3.1-x86_64-unknown-linux-gnu ct
 $ chmod +x ct
-$ ./ct -platform openstack-metadata -in-file coreos.yaml -out-file config.ign
 ```
 
-All the magic that needs to happen
-==================================
-
-Requirements:
-
-* `*.dev` and `dev` subdomains pointing to head node
+Then convert the ``coreos.yaml`` to ``config.ign``:
 
 ```bash
-$ docker network create --driver overlay -o "com.docker.network.driver.mtu"="1454" traefik-net
-$ docker network create --driver overlay -o "com.docker.network.driver.mtu"="1454" mongo
-$ docker network create --driver overlay -o "com.docker.network.driver.mtu"="1454" --attachable celery
-$ docker node ls
-$ docker node update --label-add mongo.replica=1 --label-add core=1 ekyc8kh9a6e680bsdh3087c67
-$ docker node update --label-add mongo.replica=2 --label-add core=1 uqiwamfpqo41segqz6f8s954z
-$ docker node update --label-add mongo.replica=3 --label-add core=1 dog0pdne1gtig53vwks993vx1
-
-$ ssh $(docker node inspect ekyc8kh9a6e680bsdh3087c67 -f "{{.Status.Addr}}") docker volume create mongodata1
-$ ssh $(docker node inspect ekyc8kh9a6e680bsdh3087c67 -f "{{.Status.Addr}}") docker volume create mongoconfig1
-$ ssh $(docker node inspect uqiwamfpqo41segqz6f8s954z -f "{{.Status.Addr}}") docker volume create mongodata2
-$ ssh $(docker node inspect uqiwamfpqo41segqz6f8s954z -f "{{.Status.Addr}}") docker volume create mongoconfig2
-$ ssh $(docker node inspect dog0pdne1gtig53vwks993vx1 -f "{{.Status.Addr}}") docker volume create mongodata3
-$ ssh $(docker node inspect dog0pdne1gtig53vwks993vx1 -f "{{.Status.Addr}}") docker volume create mongoconfig3
-
-$ docker service create \
-    --replicas 1 --network mongo \
-    --mount type=volume,source=mongodata1,target=/data/db \
-    --mount type=volume,source=mongoconfig1,target=/data/configdb \
-    --constraint 'node.labels.mongo.replica == 1' \
-    --name mongo1 mongo:3.2 mongod --replSet rs1
-
-$ docker service create \
-    --replicas 1 --network mongo \
-    --mount type=volume,source=mongodata2,target=/data/db \
-    --mount type=volume,source=mongoconfig2,target=/data/configdb \
-    --constraint 'node.labels.mongo.replica == 2' \
-    --name mongo2 mongo:3.2 mongod --replSet rs1
-
-$ docker service create \
-    --replicas 1 --network mongo \
-    --mount type=volume,source=mongodata3,target=/data/db \
-    --mount type=volume,source=mongoconfig3,target=/data/configdb \
-    --constraint 'node.labels.mongo.replica == 3' \
-    --name mongo3 mongo:3.2 mongod --replSet rs1
-
-# Manual db restore if needed ^^^
-
-# needs assets
-
-$ docker service create --name traefik \
-    --constraint=node.role==manager \
-    --publish 80:80 --publish 443:443 --publish 8080:8080 \
-    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly \
-    --mount type=bind,source=/home/core/traefik,target=/etc/traefik \
-    --mount type=bind,source=/home/core/traefik/acme,target=/acme \
-    --network traefik-net traefik
-
-$ docker service create \
-    --constraint 'node.labels.core == 1' --replicas 1 --network celery --name redis --label traefik.enable=false redis
-
-$ docker service create \
-    --name girder --label traefik.port=8080 \
-    --constraint 'node.labels.core == 1' \
-    --label traefik.docker.network=traefik-net \
-    --label traefik.frontend.passHostHeader=true \
-    --label traefik.enable=true \
-    --label traefik.frontend.entryPoints=https \
-    --network traefik-net --network celery --network mongo \
-    wholetale/girder:dev
-
-$ docker run --privileged \
-    --name celery_worker \
-    --label traefik.enable=false \
-    -e GIRDER_API_URL=https://girder.wholetale.xyz/api/v1 \
-    -e HOSTDIR=/host \
-    -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v /:/host \
-    --device /dev/fuse \
-    --cap-add SYS_ADMIN \
-    --cap-add SYS_PTRACE \
-    --network celery \
-    -d --entrypoint=/usr/bin/python \
-    wholetale/gwvolman:dev \
-      -m girder_worker -l info \
-      -Q manager,$(docker info --format "{{.Swarm.NodeID}}") \
-      --hostname=$(docker info --format "{{.Swarm.NodeID}}")
-
-$ docker service create \
-    --replicas 1 \
-    --network traefik-net \
-    --constraint 'node.labels.core == 1' \
-    -e GIRDER_API_URL=https://girder.wholetale.xyz \
-    --label traefik.port=80 \
-    --label traefik.docker.network=traefik-net \
-    --label traefik.frontend.passHostHeader=true \
-    --label traefik.enable=true \
-    --label traefik.frontend.entryPoints=https \
-    --name dashboard wholetale/dashboard    # or :stable
-
-# On slave nodes:
-$ sudo su
-$ mkdir /opt
-$ mount --bind /opt /usr/local
-$ docker run --privileged \
-    --name celery_worker \
-    --label traefik.enable=false \
-    -e GIRDER_API_URL=https://girder.wholetale.xyz/api/v1 \
-    -e HOSTDIR=/host \
-    -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v /:/host \
-    -v /tmp:/tmp \
-    --device /dev/fuse \
-    --cap-add SYS_ADMIN \
-    --cap-add SYS_PTRACE \
-    --network celery \
-    -d --entrypoint=/usr/bin/python \
-    wholetale/gwvolman:dev \
-      -m girder_worker -l info \
-      -Q celery,$(docker info --format "{{.Swarm.NodeID}}") \
-      --hostname=$(docker info --format "{{.Swarm.NodeID}}")
-$ docker cp celery_worker:/usr/local/ /usr
+$ ct -platform openstack-metadata -in-file coreos.yaml -out-file config.ign
 ```
+
+## Terraform variables
+
+The deployment process uses [Terraform](https://www.terraform.io/).  You'll need to [download and install Terraform for your OS](https://www.terraform.io/downloads.html). Tthis deployment process currently supports only the OpenStack provider.
+
+The ``variables.tf`` file contains variables used during the deployment process. Important variables include:
+* image: Image name for CoreOS in your OpenStack project.
+* flavor: Instance flavor in OpenStack
+* external_gateway: ID for external gateway from OpenStack
+* pool: Name of OpenStack floating IP pool
+* num_slaves: Number of Swarm worker nodes
+* domain: Domain name for Whole Tale deployment
+* globus_client_id: Globus auth client ID
+* globus_client_secret: Globus auth client secret
+* docker_mtu: Docker MTU for  OpenStack
+* restore_url: Mongo DB restore URL
+
+## Terraform deployment
+
+With these settings in place, the deployment process is simple:
+
+```bash
+source openstack-rc.sh
+terraform apply
+```
+
+What happens?
+* Creates OpenStack networks and security groups
+* Provisions VM instances and volumes
+* Creates Docker swarm cluster including master and n workers
+* Creates multiple Docker overlay networks
+* Deploys replicated Mongo database and restores from backup
+* Deploys traefik proxy with Let's Encrypy integration for TLS
+* Deploys Celery master and workers
+* Deploys core Girder and Dashboard services
+

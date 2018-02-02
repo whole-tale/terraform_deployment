@@ -39,7 +39,7 @@ address = ":8080"
   
 [docker]
 endpoint = "unix:///var/run/docker.sock"
-domain = "dev.wholetale.org"
+domain = "${domain}"
 watch = true
 exposedbydefault = true
 swarmmode = true

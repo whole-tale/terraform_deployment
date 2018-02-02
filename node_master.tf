@@ -1,5 +1,5 @@
 resource "openstack_compute_instance_v2" "swarm_master" {
-  name = "wt-prod-00"
+  name = "${var.cluster_name}-00"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
@@ -25,7 +25,30 @@ resource "null_resource" "provision_master" {
   }
 
   provisioner "remote-exec" {
-    script = "./scripts/pre-setup-all.sh"
+    inline = ["sudo hostnamectl set-hostname ${openstack_compute_instance_v2.swarm_master.name}"]
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /home/core/wholetale/"
+    ]
+  }
+
+  provisioner "file" {
+    source = "scripts/pre-setup-all.sh"
+    destination = "/home/core/wholetale/pre-setup-all.sh"
+  }
+
+  provisioner "file" {
+    source = "scripts/post-setup-master.sh"
+    destination = "/home/core/wholetale/post-setup-master.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/core/wholetale/pre-setup-all.sh",
+      "/home/core/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+    ]
   }
 
   provisioner "remote-exec" {
@@ -35,6 +58,17 @@ resource "null_resource" "provision_master" {
   }
 
   provisioner "remote-exec" {
-    script = "./scripts/post-setup-master.sh"
+    inline = [
+      "chmod +x /home/core/wholetale/post-setup-master.sh",
+      "/home/core/wholetale/post-setup-master.sh ${var.docker_mtu}"
+    ]
+  }
+}
+
+data "external" "swarm_join_token" {
+  depends_on = ["null_resource.provision_master"]
+  program = ["./scripts/get-token.sh"]
+  query = {
+    host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
   }
 }

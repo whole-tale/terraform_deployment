@@ -1,0 +1,18 @@
+version: "3.2"
+
+networks:
+  outside:
+    external:
+      name: "host"
+
+services:
+  checkmk-agent:
+    image: wholetale/check_mk:latest
+    networks:
+      - outside
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    deploy:
+      mode: global
+    environment:
+      - NAMESPACE=wt
