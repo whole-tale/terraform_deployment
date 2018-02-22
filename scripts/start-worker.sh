@@ -25,7 +25,4 @@ docker run --privileged \
       -Q ${role},$(docker info --format "{{.Swarm.NodeID}}") \
       --hostname=$(docker info --format "{{.Swarm.NodeID}}")
 
-nohup docker pull rocker/ropensci > /dev/null 2>&1 & 
-nohup docker pull xarthisius/jupyter > /dev/null 2>&1 & 
-
 sleep 10
