@@ -92,8 +92,6 @@ services:
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
         - "traefik.frontend.entryPoints=https"
-    deploy:
-      replicas: 1
       placement:
         constraints:
           - node.labels.storage == 1
