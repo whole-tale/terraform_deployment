@@ -2,6 +2,8 @@
 
 domain=$1 
 role=$2
+registry_user=$3
+registry_pass=$4
 
 sudo umount /usr/local/lib > /dev/null 2>&1 || true
 docker stop celery_worker >/dev/null 2>&1
@@ -15,9 +17,9 @@ docker run \
     -e GIRDER_API_URL=https://girder.${domain}/api/v1 \
     -e HOSTDIR=/host \
     -e TRAEFIK_NETWORK=wt_traefik-net \
-    -e REGISTRY_USER=TODO_SET_ME \
+    -e REGISTRY_USER=${registry_user} \
     -e REGISTRY_URL=https://registry.${domain} \
-    -e REGISTRY_PASS=TODO_USE_VARIABLE \
+    -e REGISTRY_PASS=${registry_pass} \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/host \
     -v /var/cache/davfs2:/var/cache/davfs2 \
