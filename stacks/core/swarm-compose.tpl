@@ -9,6 +9,7 @@ networks:
     driver: overlay
     driver_opts:
       com.docker.network.driver.mtu: ${mtu}
+    attachable: true
   celery:
     driver: overlay
     driver_opts:
@@ -92,8 +93,6 @@ services:
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
         - "traefik.frontend.entryPoints=https"
-    deploy:
-      replicas: 1
       placement:
         constraints:
           - node.labels.storage == 1
