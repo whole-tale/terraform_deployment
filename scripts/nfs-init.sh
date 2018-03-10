@@ -80,8 +80,11 @@ if [ ! -d ${mount_path} ]; then
    mkdir -p ${mount_path}
 fi
 
+
+mount_name=$(echo "$mount_path" | sed 's/^\///g' | sed 's/\//-/g')
+
 # Create systemd mount file
-cat << EOF >  /etc/systemd/system/mnt.mount
+cat << EOF >  /etc/systemd/system/${mount_name}.mount
 [Unit]
 Description=Mount $device on $mount_path
 After=local-fs.target
@@ -102,7 +105,7 @@ if  ! mount | grep "^${device} " > /dev/null ; then
    if [ $verbose ]; then
       echo "Mounting ${device} to ${mount_path}"
    fi
-   systemctl start mnt.mount
+   systemctl start ${mount_name}.mount
 else
    echo "${device} already mounted"
 fi
