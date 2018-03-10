@@ -9,6 +9,7 @@ These are detailed below, but in short:
 * [CoreOS Config Transpiler](https://github.com/coreos/container-linux-config-transpiler)
 * Wildcard DNS for your domain
 * [Globus Auth client ID and secret](https://auth.globus.org/v2/web/developers)
+* rclone binary 
 
 
 ## OpenStack
@@ -43,6 +44,13 @@ Then convert the ``coreos.yaml`` to ``config.ign``:
 ```bash
 $ ct -platform openstack-metadata -in-file coreos.yaml -out-file config.ign
 ```
+
+## Setup rclone
+
+wget https://downloads.rclone.org/rclone-v1.39-linux-amd64.zip
+unzip
+rclone --config rclone.conf config
+See rclone.md
 
 ## Terraform variables
 
