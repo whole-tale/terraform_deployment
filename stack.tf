@@ -94,7 +94,7 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/init-mongo.sh",
-      "/home/core/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret} ${var.restore_url}"
+      "/home/core/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret}"
     ]
   }
 
