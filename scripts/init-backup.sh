@@ -8,7 +8,7 @@ Description=Runs nightly backup
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/docker run --rm --network wt_mongo -v /mnt/home:/data -v /home/core/rclone/:/conf craigwillis/wholetale-backup /backup.sh 2>&1  > /home/core/wholetale/backup.log
+ExecStart=/usr/bin/docker run --rm --network wt_mongo -v /mnt/home:/backup -v /home/core/rclone/:/conf craigwillis/wholetale-backup backup.sh 2>&1  > /home/core/wholetale/backup.log
 
 [Install]
 WantedBy=multi-user.target
