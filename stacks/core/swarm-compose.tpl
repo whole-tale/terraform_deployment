@@ -101,8 +101,8 @@ services:
       - celery
     deploy:
       replicas: 1
-    	labels:
-      	- "traefik.enable=false"
+      labels:
+        - "traefik.enable=false"
 
   dashboard:
     image: wholetale/dashboard:stable
