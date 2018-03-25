@@ -101,7 +101,7 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/start-worker.sh",
-      "/home/core/wholetale/start-worker.sh ${var.domain} manager"
+      "/home/core/wholetale/start-worker.sh ${var.domain} manager ${var.registry_user} ${var.registry_pass}"
     ]
   }
 }
@@ -130,7 +130,7 @@ resource "null_resource" "start_worker" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/start-worker.sh",
-      "/home/core/wholetale/start-worker.sh ${var.domain} celery"
+      "/home/core/wholetale/start-worker.sh ${var.domain} celery ${var.registry_user} ${var.registry_pass}"
     ]
   }
 }
