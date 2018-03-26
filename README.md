@@ -47,10 +47,20 @@ $ ct -platform openstack-metadata -in-file coreos.yaml -out-file config.ign
 
 ## Setup rclone
 
+Download and run rclone to generate the `rclone.conf` prior to deployment:
+
+```
 wget https://downloads.rclone.org/rclone-v1.39-linux-amd64.zip
 unzip
 rclone --config rclone.conf config
-See rclone.md
+```
+
+Select the following options:
+* New config (n) named `backup`
+* Use Box (4)
+* Leave client ID and secret blank
+* Use auto configure (Y)
+* This will open a browser and prompt you to login to Box
 
 ## Terraform variables
 
