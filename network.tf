@@ -6,7 +6,7 @@ resource "openstack_networking_network_v2" "ext_network" {
 resource "openstack_networking_subnet_v2"  "ext_net_subnet" {
   name       = "${var.cluster_name}-external_subnet"
   network_id = "${openstack_networking_network_v2.ext_network.id}"
-  cidr       = "192.168.99.0/24"
+  cidr       = "${var.external_subnet}"
   ip_version = 4
   enable_dhcp = "true"
   dns_nameservers = ["8.8.8.8", "8.8.8.4"]
@@ -31,7 +31,7 @@ resource "openstack_networking_network_v2" "int_network" {
 resource "openstack_networking_subnet_v2"  "int_net_subnet" {
   name       = "${var.cluster_name}-internal_subnet"
   network_id = "${openstack_networking_network_v2.int_network.id}"
-  cidr       = "192.168.149.0/24"
+  cidr       = "${var.internal_subnet}"
   ip_version = 4
   enable_dhcp = "true"
   no_gateway = "true"

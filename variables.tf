@@ -32,6 +32,16 @@ variable "pool" {
     description = "Network pool for assigning floating_ips"
 }
 
+variable "external_subnet" {
+    default = "192.168.99.0/24"
+    description = "Default subnet for external network"
+}
+
+variable "internal_subnet" {
+    default = "192.168.149.0/24"
+    description = "Default subnet for external network"
+}
+
 variable "cluster_name" {
     default = "wt-dev"
     description = "Cluster name"
