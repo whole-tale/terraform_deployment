@@ -1,5 +1,5 @@
 resource "openstack_networking_secgroup_v2" "wt_master" {
-  name = "WT Master Node"
+  name = "${var.cluster_name} Master Node"
   description = "HTTP/HTTPS access for main node"
 }
 

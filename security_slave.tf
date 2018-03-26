@@ -1,5 +1,5 @@
 resource "openstack_networking_secgroup_v2" "wt_node" {
-  name = "WT Node defaults"
+  name = "${var.cluster_name} Node defaults"
   description = "Default set of networking rules for WT Node"
 }
 
