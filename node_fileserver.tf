@@ -105,9 +105,7 @@ resource "null_resource" "provision_fileserver" {
       "chmod +x /home/core/wholetale/init-backup.sh",
       "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
       "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
-      "sudo /home/core/wholetale/init-backup.sh"
-    ]
-  }
+      "sudo /home/core/wholetale/init-backup.sh ${var.cluster_name}"
     ]
   }
 
