@@ -66,3 +66,13 @@ variable "nfs_volume_size" {
     default =  40
     description = "Fileserver volume size in GB"
 }
+
+variable "registry_user" {
+    default = "fido"
+    description = "Default user used in the internal docker registry"
+}
+
+variable "registry_pass" {
+    default = "10DSObv0Awqaa8Wz4d3K"
+    description = "Random password for the user used in the internal docker registry"
+}

@@ -100,10 +100,10 @@ services:
     image: redis
     networks:
       - celery
-    labels:
-      - "traefik.enable: false"
     deploy:
       replicas: 1
+      labels:
+        - "traefik.enable=false"
 
   dashboard:
     image: wholetale/dashboard:stable
@@ -120,3 +120,27 @@ services:
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
         - "traefik.frontend.entryPoints=https"
+
+  registry:
+    image: registry:2.6
+    networks:
+      - traefik-net
+    volumes:
+      - "/mnt/registry:/var/lib/registry"
+      - "/mnt/registry/auth:/auth:ro"
+    environment:
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm"
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/registry.password
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=5000"
+        - "traefik.frontend.rule=Host:registry.${domain}"
+        - "traefik.docker.network=wt_traefik-net"
+        - "traefik.frontend.passHostHeader=true"
+        - "traefik.frontend.entryPoints=https"
+      placement:
+        constraints:
+          - node.labels.storage == 1

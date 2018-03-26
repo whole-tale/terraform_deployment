@@ -1,7 +1,7 @@
 #!/bin/bash
 
 device=""
-mount_path=""
+mount_path=""   # assumes /mnt/<name> TODO: Add sanity check
 export_path=""
 cidr_range=""
 verbose=0
@@ -81,10 +81,8 @@ if [ ! -d ${mount_path} ]; then
 fi
 
 
-mount_name=$(echo "$mount_path" | sed 's/^\///g' | sed 's/\//-/g')
-
 # Create systemd mount file
-cat << EOF >  /etc/systemd/system/${mount_name}.mount
+cat << EOF >  /etc/systemd/system/mnt-${mount_path#/mnt/}.mount
 [Unit]
 Description=Mount $device on $mount_path
 After=local-fs.target
@@ -99,13 +97,15 @@ Options=noatime
 WantedBy=multi-user.target
 EOF
 
+# Enable mount file
+systemctl enable mnt-${mount_path#/mnt/}.mount
 
 # Mount device to specified path
 if  ! mount | grep "^${device} " > /dev/null ; then
    if [ $verbose ]; then
       echo "Mounting ${device} to ${mount_path}"
    fi
-   systemctl start ${mount_name}.mount
+   systemctl start mnt-${mount_path#/mnt/}.mount
 else
    echo "${device} already mounted"
 fi

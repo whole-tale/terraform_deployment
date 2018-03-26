@@ -39,6 +39,14 @@ resource "openstack_compute_volume_attach_v2" "registry-vol" {
   volume_id   = "${openstack_blockstorage_volume_v2.registry-vol.id}"
 }
 
+output "Registry device" {
+  value = "${openstack_compute_volume_attach_v2.registry-vol.device}"
+}
+
+output "Home device" {
+  value = "${openstack_compute_volume_attach_v2.homes-vol.device}"
+}
+
 resource "null_resource" "provision_fileserver" {
   depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_master", "openstack_compute_volume_attach_v2.homes-vol", "openstack_compute_volume_attach_v2.registry-vol"]
   connection {
@@ -95,9 +103,19 @@ resource "null_resource" "provision_fileserver" {
     inline = [
       "chmod +x /home/core/wholetale/nfs-init.sh",
       "chmod +x /home/core/wholetale/init-backup.sh",
-      "sudo /home/core/wholetale/nfs-init.sh -v -d /dev/vdb -m /mnt/home -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
-      "sudo /home/core/wholetale/nfs-init.sh -v -d /dev/vdc -m /mnt/registry -e /registry -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
+      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
+      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
       "sudo /home/core/wholetale/init-backup.sh"
+    ]
+  }
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "docker pull registry:2.6",
+      "sudo mkdir -p /mnt/registry/auth",
+      "docker run --rm --entrypoint htpasswd registry:2.6 -Bbn ${var.registry_user} ${var.registry_pass} | sudo tee /mnt/registry/auth/registry.password > /dev/null"
     ]
   }
 }
