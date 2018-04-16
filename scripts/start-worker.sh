@@ -29,7 +29,7 @@ docker run \
     --cap-add SYS_PTRACE \
     --network wt_celery \
     -d --entrypoint=/usr/bin/python \
-    wholetale/gwvolman:dev \
+    wholetale/gwvolman:latest \
       -m girder_worker -l info \
       -Q ${role},$(docker info --format "{{.Swarm.NodeID}}") \
       --hostname=$(docker info --format "{{.Swarm.NodeID}}")
