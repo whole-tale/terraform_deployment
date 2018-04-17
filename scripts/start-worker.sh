@@ -5,11 +5,13 @@ role=$2
 registry_user=$3
 registry_pass=$4
 
+image=wholetale/gwvolman:stable
+
 sudo umount /usr/local/lib > /dev/null 2>&1 || true
 docker stop celery_worker >/dev/null 2>&1
 docker rm celery_worker > /dev/null 2>&1 
 
-docker pull wholetale/gwvolman:dev > /dev/null 2>&1
+docker pull ${image} > /dev/null 2>&1
 
 docker run \
     --name celery_worker \
@@ -28,15 +30,9 @@ docker run \
     --cap-add SYS_ADMIN \
     --cap-add SYS_PTRACE \
     --network wt_celery \
-    -d --entrypoint=/usr/bin/python \
-    wholetale/gwvolman:latest \
-      -m girder_worker -l info \
+    -d ${image} \
       -Q ${role},$(docker info --format "{{.Swarm.NodeID}}") \
       --hostname=$(docker info --format "{{.Swarm.NodeID}}")
-
-sudo mount --bind \
-  $(docker inspect --format={{.GraphDriver.Data.MergedDir}} celery_worker)/usr/local/lib \
-  /usr/local/lib
 
 docker exec -ti celery_worker chown davfs2:davfs2 /host/run/mount.davfs
 docker exec -ti celery_worker chown davfs2:davfs2 /host/var/cache/davfs2
