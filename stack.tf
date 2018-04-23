@@ -39,7 +39,7 @@ resource "null_resource" "label_nodes" {
 }
 
 resource "null_resource" "deploy_stack" {
-  depends_on = ["null_resource.label_nodes"]
+  depends_on = ["null_resource.label_nodes", "null_resource.provision_fileserver"]
 
   connection {
     user = "${var.ssh_user_name}"
