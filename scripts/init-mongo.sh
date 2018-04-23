@@ -4,8 +4,6 @@
 domain=$1
 globus_client_id=$2
 globus_client_secret=$3
-restore_url=$4
-
 
 # Wait for wt_mongo1 container
 container=$(docker ps -qf label=com.docker.swarm.service.name=wt_mongo1)
@@ -26,18 +24,6 @@ done
 # Init replica set
 echo "Initializing replica set"
 docker exec -it $container mongo --eval 'rs.initiate( { _id : "rs1", members: [ { _id : 0, host : "wt_mongo1:27017" } ] })'
-
-# Import DB
-if [ ! -z "$restore_url" ]; then
-    echo "Restoring Mongo from backup $restore_url"
-    curl -J -o girder_backup.tar.gz $restore_url
-    docker cp girder_backup.tar.gz $container:.
-    docker exec $container mkdir /restore
-    docker exec $container tar -xvf girder_backup.tar.gz -C /restore
-    docker exec $container mongorestore --drop --db=girder /restore/girder
-    docker exec $container mongorestore --drop --db=assetstore /restore/assetstore
-    docker exec $container rm girder_backup.tar.gz
-fi
 
 # Create replica set
 echo "Configuring replica set"

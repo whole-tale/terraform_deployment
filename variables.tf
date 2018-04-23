@@ -72,11 +72,6 @@ variable "globus_client_secret" {
     description = "Globus client secret"
 }
 
-variable "restore_url" {
-    default = ""
-    description = "Mongo DB restore URL"
-}
-
 variable "nfs_volume_size" {
     default =  40
     description = "Fileserver volume size in GB"

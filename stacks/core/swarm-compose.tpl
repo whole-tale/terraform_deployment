@@ -9,6 +9,7 @@ networks:
     driver: overlay
     driver_opts:
       com.docker.network.driver.mtu: ${mtu}
+    attachable: true
   celery:
     driver: overlay
     driver_opts:

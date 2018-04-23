@@ -9,6 +9,7 @@ These are detailed below, but in short:
 * [CoreOS Config Transpiler](https://github.com/coreos/container-linux-config-transpiler)
 * Wildcard DNS for your domain
 * [Globus Auth client ID and secret](https://auth.globus.org/v2/web/developers)
+* rclone binary 
 
 
 ## OpenStack
@@ -43,6 +44,35 @@ Then convert the ``coreos.yaml`` to ``config.ign``:
 ```bash
 $ ct -platform openstack-metadata -in-file coreos.yaml -out-file config.ign
 ```
+
+## Setup rclone
+
+The backup process leverages rclone, a simple command line tool to syncrhonize files to a variety of cloud storage services.  We currently use Box for the Whole Tale system. This requires creating an `rclone.conf` file prior to deployment:
+
+```
+wget https://downloads.rclone.org/v1.39/rclone-v1.39-linux-amd64.zip
+unzip
+rclone --config rclone.conf config
+```
+
+This will walk you through an interactive session.  Select the following options:
+* New config (n) named `backup`
+* Use Box 
+* Leave client ID and secret blank
+* Use auto configure (Y)
+* This will open a browser and prompt you to login to Box
+
+This process will generate a config file with the following information:
+
+```
+[backup]
+type = box
+client_id =
+client_secret =
+token = {"access_token":"<token>","token_type":"bearer","refresh_token":"<token>","expiry":"<date>"}
+```
+
+Rclone is used by the `wholetale/backup` container to backup and restore home directories and Mongo using Box.
 
 ## Terraform variables
 

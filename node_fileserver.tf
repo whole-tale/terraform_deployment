@@ -5,6 +5,7 @@ resource "openstack_blockstorage_volume_v2" "homes-vol" {
 }
 
 resource "openstack_blockstorage_volume_v2" "registry-vol" {
+  depends_on = ["openstack_blockstorage_volume_v2.homes-vol"]
   name = "${var.cluster_name}-registry-vol"
   description = "Shared volume for Docker registry"
   size = "${var.nfs_volume_size}"
@@ -27,13 +28,13 @@ resource "openstack_compute_instance_v2" "fileserver" {
 }
 
 resource "openstack_compute_volume_attach_v2" "homes-vol" {
-  depends_on = ["openstack_compute_instance_v2.fileserver"]
+  depends_on = ["openstack_compute_instance_v2.fileserver", "openstack_blockstorage_volume_v2.homes-vol"]
   instance_id = "${openstack_compute_instance_v2.fileserver.id}"
   volume_id   = "${openstack_blockstorage_volume_v2.homes-vol.id}"
 }
 
 resource "openstack_compute_volume_attach_v2" "registry-vol" {
-  depends_on = ["openstack_compute_instance_v2.fileserver"]
+  depends_on = ["openstack_compute_instance_v2.fileserver", "openstack_blockstorage_volume_v2.registry-vol"]
   instance_id = "${openstack_compute_instance_v2.fileserver.id}"
   volume_id   = "${openstack_blockstorage_volume_v2.registry-vol.id}"
 }
@@ -60,7 +61,8 @@ resource "null_resource" "provision_fileserver" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/core/wholetale/"
+      "mkdir -p /home/core/wholetale/",
+      "mkdir -p /home/core/rclone/",
     ]
   }
 
@@ -87,11 +89,23 @@ resource "null_resource" "provision_fileserver" {
     destination = "/home/core/wholetale/nfs-init.sh"
   }
 
+  provisioner "file" {
+    source = "scripts/init-backup.sh"
+    destination = "/home/core/wholetale/init-backup.sh"
+  }
+
+  provisioner "file" {
+    source = "rclone.conf"
+    destination = "/home/core/rclone/rclone.conf"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/nfs-init.sh",
+      "chmod +x /home/core/wholetale/init-backup.sh",
       "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
       "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
+      "sudo /home/core/wholetale/init-backup.sh ${var.cluster_name}"
     ]
   }
 
@@ -102,9 +116,4 @@ resource "null_resource" "provision_fileserver" {
       "docker run --rm --entrypoint htpasswd registry:2.6 -Bbn ${var.registry_user} ${var.registry_pass} | sudo tee /mnt/registry/auth/registry.password > /dev/null"
     ]
   }
-
-#  provisioner "remote-exec" {
-#    inline = ["sudo umount -A"]
-#    when   = "destroy"
-#  }
 }

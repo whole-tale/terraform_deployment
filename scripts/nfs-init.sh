@@ -80,6 +80,7 @@ if [ ! -d ${mount_path} ]; then
    mkdir -p ${mount_path}
 fi
 
+
 # Create systemd mount file
 cat << EOF >  /etc/systemd/system/mnt-${mount_path#/mnt/}.mount
 [Unit]
