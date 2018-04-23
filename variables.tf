@@ -8,7 +8,7 @@ variable "image" {
 }
 
 variable "flavor" {
-    default = "m1.small"
+    default = "m1.medium"
     description = "openstack flavor list : Name"
 }
 
