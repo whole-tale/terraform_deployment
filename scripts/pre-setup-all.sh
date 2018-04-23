@@ -11,3 +11,13 @@ docker network create \
   --opt com.docker.network.bridge.enable_ip_masquerade=true \
   --opt com.docker.network.driver.mtu=${mtu} \
   docker_gwbridge
+
+
+# Set the maximum journal size
+cat << EOF > /etc/systemd/journald.conf 
+[Journal]
+SystemMaxUse=500M
+EOF
+
+sudo systemctl reload systemd-journald
+systemctl restart systemd-journald
