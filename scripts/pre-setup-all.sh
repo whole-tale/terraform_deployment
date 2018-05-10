@@ -14,10 +14,10 @@ docker network create \
 
 
 # Set the maximum journal size
-cat << EOF > /etc/systemd/journald.conf 
+sudo cat << EOF > /etc/systemd/journald.conf 
 [Journal]
 SystemMaxUse=500M
 EOF
 
 sudo systemctl reload systemd-journald
-systemctl restart systemd-journald
+sudo systemctl restart systemd-journald
