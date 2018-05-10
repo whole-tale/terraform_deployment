@@ -33,6 +33,9 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/home/core/wholetale/traefik:/etc/traefik"
       - "/home/core/wholetale/traefik/acme:/acme"
+    environment:
+      - GODADDY_API_KEY=${godaddy_api_key}
+      - GODADDY_API_SECRET=${godaddy_api_secret}
     deploy:
       replicas: 1
       placement:
@@ -84,9 +87,6 @@ services:
       - celery
       - traefik-net
       - mongo
-    environment:
-      - GODADDY_API_KEY=${godaddy_api_key}
-      - GODADDY_API_SECRET=${godaddy_api_secret}
     deploy:
       replicas: 1
       labels:
