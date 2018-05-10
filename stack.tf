@@ -90,7 +90,7 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod 600 /home/core/wholetale/traefik/acme/acme.json",
-      "sed -i 's/dashboard\.prod/dashboard/g' /home/core/wholetale/swarm-compose.yaml",
+      "sed -i 's/dashboard\\.prod/dashboard/g' /home/core/wholetale/swarm-compose.yaml",
       "sed -i 's/dashboard-prod/dashboard/g' /home/core/wholetale/traefik/traefik.toml",
       "docker stack deploy --compose-file /home/core/wholetale/swarm-compose.yaml wt",
       "docker stack deploy --compose-file /home/core/wholetale/monitoring.yaml omd"
