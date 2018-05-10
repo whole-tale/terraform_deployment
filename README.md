@@ -10,7 +10,7 @@ These are detailed below, but in short:
 * Wildcard DNS for your domain
 * [Globus Auth client ID and secret](https://auth.globus.org/v2/web/developers)
 * rclone binary 
-* n3integrate GoDaddy Terraform plugin
+* GoDaddy API integration
 
 
 ## OpenStack
@@ -77,20 +77,7 @@ Rclone is used by the `wholetale/backup` container to backup and restore home di
 
 ## GoDaddy API Integration
 
-The deployment process uses the [n3integrate plugin](https://github.com/n3integration/terraform-godaddy).
-
-```
-bash <(curl -s https://raw.githubusercontent.com/n3integration/terraform-godaddy/master/install.sh)
-```
-
-This requires that you setup an API key via the [GoDaddy developer interface](https://developer.godaddy.com/keys).
-
-Set the API key and secret environment variables prior to running  `terraform apply`.
-
-```
-export GODADDY_API_KEY=abc
-export GODADDY_API_SECRET=123
-```
+The deployment process uses the GoDaddy API to automatically create DNS entries for non-production deployments and for wildcard certificate generation.
 
 ## Terraform variables
 
@@ -106,7 +93,8 @@ The ``variables.tf`` file contains variables used during the deployment process.
 * globus_client_id: Globus auth client ID
 * globus_client_secret: Globus auth client secret
 * docker_mtu: Docker MTU for  OpenStack
-* restore_url: Mongo DB restore URL
+* godaddy_api_key:  GoDaddy API key
+* godaddy_api_secret: GoDaddy API secret
 
 ## Terraform deployment
 
