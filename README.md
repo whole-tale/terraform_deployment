@@ -10,6 +10,7 @@ These are detailed below, but in short:
 * Wildcard DNS for your domain
 * [Globus Auth client ID and secret](https://auth.globus.org/v2/web/developers)
 * rclone binary 
+* n3integrate GoDaddy Terraform plugin
 
 
 ## OpenStack
@@ -73,6 +74,23 @@ token = {"access_token":"<token>","token_type":"bearer","refresh_token":"<token>
 ```
 
 Rclone is used by the `wholetale/backup` container to backup and restore home directories and Mongo using Box.
+
+## GoDaddy API Integration
+
+The deployment process uses the [n3integrate plugin](https://github.com/n3integration/terraform-godaddy).
+
+```
+bash <(curl -s https://raw.githubusercontent.com/n3integration/terraform-godaddy/master/install.sh)
+```
+
+This requires that you setup an API key via the [GoDaddy developer interface](https://developer.godaddy.com/keys).
+
+Set the API key and secret environment variables prior to running  `terraform apply`.
+
+```
+export GODADDY_API_KEY=abc
+export GODADDY_API_SECRET=123
+```
 
 ## Terraform variables
 
