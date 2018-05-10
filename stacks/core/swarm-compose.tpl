@@ -84,10 +84,13 @@ services:
       - celery
       - traefik-net
       - mongo
+    environment:
+      - GODADDY_API_KEY=${godaddy_api_key}
+      - GODADDY_API_SECRET=${godaddy_api_secret}
     deploy:
       replicas: 1
       labels:
-        - "traefik.frontend.rule=Host:girder.${domain}"
+        - "traefik.frontend.rule=Host:girder.${subdomain}.${domain}"
         - "traefik.port=8080"
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"
@@ -110,12 +113,12 @@ services:
     networks:
       - traefik-net
     environment:
-      - GIRDER_API_URL=https://girder.${domain}
+      - GIRDER_API_URL=https://girder.${subdomain}.${domain}
     deploy:
       replicas: 1
       labels:
         - "traefik.port=80"
-        - "traefik.frontend.rule=Host:dashboard.${domain}"
+        - "traefik.frontend.rule=Host:dashboard.${subdomain}.${domain}"
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
