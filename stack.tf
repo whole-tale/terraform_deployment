@@ -3,6 +3,7 @@ data "template_file" "traefik" {
 
   vars {
     domain = "${var.domain}"
+    subdomain = "${var.subdomain}"
   }
 }
 
@@ -11,12 +12,15 @@ data "template_file" "stack" {
 
   vars {
     domain = "${var.domain}"
+    subdomain = "${var.subdomain}"
     mtu = "${var.docker_mtu}"
+    godaddy_api_key = "${var.godaddy_api_key}"
+    godaddy_api_secret = "${var.godaddy_api_secret}"
   }
 }
 
 resource "null_resource" "label_nodes" {
-  depends_on = ["null_resource.provision_slave"]
+  depends_on = ["null_resource.provision_slave", "null_resource.provision_fileserver"]
 
   connection {
     user = "${var.ssh_user_name}"
@@ -39,7 +43,7 @@ resource "null_resource" "label_nodes" {
 }
 
 resource "null_resource" "deploy_stack" {
-  depends_on = ["null_resource.label_nodes"]
+  depends_on = ["null_resource.label_nodes", "null_resource.provision_fileserver"]
 
   connection {
     user = "${var.ssh_user_name}"
@@ -86,6 +90,8 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod 600 /home/core/wholetale/traefik/acme/acme.json",
+      "sed -i 's/dashboard\\.prod/dashboard/g' /home/core/wholetale/swarm-compose.yaml",
+      "sed -i 's/dashboard-prod/dashboard/g' /home/core/wholetale/traefik/traefik.toml",
       "docker stack deploy --compose-file /home/core/wholetale/swarm-compose.yaml wt",
       "docker stack deploy --compose-file /home/core/wholetale/monitoring.yaml omd"
     ]
@@ -94,14 +100,14 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/init-mongo.sh",
-      "/home/core/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret}"
+      "/home/core/wholetale/init-mongo.sh ${var.subdomain}.${var.domain} ${var.globus_client_id} ${var.globus_client_secret}"
     ]
   }
 
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/start-worker.sh",
-      "/home/core/wholetale/start-worker.sh ${var.domain} manager ${var.registry_user} ${var.registry_pass}"
+      "/home/core/wholetale/start-worker.sh ${var.subdomain}.${var.domain} manager ${var.registry_user} ${var.registry_pass}"
     ]
   }
 }
@@ -130,7 +136,7 @@ resource "null_resource" "start_worker" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/start-worker.sh",
-      "/home/core/wholetale/start-worker.sh ${var.domain} celery ${var.registry_user} ${var.registry_pass}"
+      "/home/core/wholetale/start-worker.sh ${var.subdomain}.${var.domain} celery ${var.registry_user} ${var.registry_pass}"
     ]
   }
 }

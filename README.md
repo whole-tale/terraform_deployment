@@ -10,6 +10,7 @@ These are detailed below, but in short:
 * Wildcard DNS for your domain
 * [Globus Auth client ID and secret](https://auth.globus.org/v2/web/developers)
 * rclone binary 
+* GoDaddy API integration
 
 
 ## OpenStack
@@ -74,6 +75,10 @@ token = {"access_token":"<token>","token_type":"bearer","refresh_token":"<token>
 
 Rclone is used by the `wholetale/backup` container to backup and restore home directories and Mongo using Box.
 
+## GoDaddy API Integration
+
+The deployment process uses the GoDaddy API to automatically create DNS entries for non-production deployments and for wildcard certificate generation.
+
 ## Terraform variables
 
 The deployment process uses [Terraform](https://www.terraform.io/).  You'll need to [download and install Terraform for your OS](https://www.terraform.io/downloads.html). Tthis deployment process currently supports only the OpenStack provider.
@@ -88,7 +93,8 @@ The ``variables.tf`` file contains variables used during the deployment process.
 * globus_client_id: Globus auth client ID
 * globus_client_secret: Globus auth client secret
 * docker_mtu: Docker MTU for  OpenStack
-* restore_url: Mongo DB restore URL
+* godaddy_api_key:  GoDaddy API key
+* godaddy_api_secret: GoDaddy API secret
 
 ## Terraform deployment
 
