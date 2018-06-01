@@ -14,6 +14,7 @@ data "template_file" "stack" {
     domain = "${var.domain}"
     subdomain = "${var.subdomain}"
     mtu = "${var.docker_mtu}"
+    version = "${var.version}"
     godaddy_api_key = "${var.godaddy_api_key}"
     godaddy_api_secret = "${var.godaddy_api_secret}"
   }
@@ -107,7 +108,7 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/start-worker.sh",
-      "/home/core/wholetale/start-worker.sh ${var.subdomain}.${var.domain} manager ${var.registry_user} ${var.registry_pass}"
+      "/home/core/wholetale/start-worker.sh ${var.subdomain}.${var.domain} manager ${var.registry_user} ${var.registry_pass} ${var.version}"
     ]
   }
 }
@@ -136,7 +137,7 @@ resource "null_resource" "start_worker" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/core/wholetale/start-worker.sh",
-      "/home/core/wholetale/start-worker.sh ${var.subdomain}.${var.domain} celery ${var.registry_user} ${var.registry_pass}"
+      "/home/core/wholetale/start-worker.sh ${var.subdomain}.${var.domain} celery ${var.registry_user} ${var.registry_pass} ${var.version}"
     ]
   }
 }

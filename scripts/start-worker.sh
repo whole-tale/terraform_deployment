@@ -4,8 +4,9 @@ domain=$1
 role=$2
 registry_user=$3
 registry_pass=$4
+version=$5
 
-image=wholetale/gwvolman:stable
+image=wholetale/gwvolman:${version}
 
 sudo umount /usr/local/lib > /dev/null 2>&1 || true
 docker stop celery_worker >/dev/null 2>&1
