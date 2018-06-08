@@ -8,7 +8,7 @@ variable "image" {
 }
 
 variable "flavor" {
-    default = "m1.small"
+    default = "m1.medium"
     description = "openstack flavor list : Name"
 }
 
@@ -62,6 +62,11 @@ variable "domain" {
     description = "Site domain name"
 }
 
+variable "subdomain" {
+    default = "dev"
+    description = "Site subdomain name"
+}
+
 variable "globus_client_id" {
     default = ""
     description = "Globus client ID"
@@ -85,4 +90,19 @@ variable "registry_user" {
 variable "registry_pass" {
     default = "10DSObv0Awqaa8Wz4d3K"
     description = "Random password for the user used in the internal docker registry"
+}
+
+variable "godaddy_api_key" {
+   default = ""
+   description = "API key for GoDaddy DNS"
+}
+
+variable "godaddy_api_secret" {
+   default = ""
+   description = "API secret for GoDaddy DNS"
+}
+
+variable "version" {
+   default = "latest"
+   description = "Docker component versions"
 }

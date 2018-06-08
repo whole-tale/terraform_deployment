@@ -33,6 +33,9 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/home/core/wholetale/traefik:/etc/traefik"
       - "/home/core/wholetale/traefik/acme:/acme"
+    environment:
+      - GODADDY_API_KEY=${godaddy_api_key}
+      - GODADDY_API_SECRET=${godaddy_api_secret}
     deploy:
       replicas: 1
       placement:
@@ -79,15 +82,18 @@ services:
         constraints:
           - node.labels.mongo.replica == 3
   girder:
-    image: wholetale/girder:latest
+    image: wholetale/girder:${version}
     networks:
       - celery
       - traefik-net
       - mongo
+    volumes:
+      - "/mnt/homes:/tmp/wt-home-dirs"
+      - "/mnt/homes:/tmp/wt-tale-dirs"
     deploy:
       replicas: 1
       labels:
-        - "traefik.frontend.rule=Host:girder.${domain}"
+        - "traefik.frontend.rule=Host:girder.${subdomain}.${domain}"
         - "traefik.port=8080"
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"
@@ -106,16 +112,16 @@ services:
         - "traefik.enable=false"
 
   dashboard:
-    image: wholetale/dashboard:stable
+    image: wholetale/dashboard:${version}
     networks:
       - traefik-net
     environment:
-      - GIRDER_API_URL=https://girder.${domain}
+      - GIRDER_API_URL=https://girder.${subdomain}.${domain}
     deploy:
       replicas: 1
       labels:
         - "traefik.port=80"
-        - "traefik.frontend.rule=Host:dashboard.${domain}"
+        - "traefik.frontend.rule=Host:dashboard.${subdomain}.${domain}"
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
