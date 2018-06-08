@@ -101,3 +101,8 @@ variable "godaddy_api_secret" {
    default = ""
    description = "API secret for GoDaddy DNS"
 }
+
+variable "version" {
+   default = "latest"
+   description = "Docker component versions"
+}

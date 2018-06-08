@@ -82,11 +82,14 @@ services:
         constraints:
           - node.labels.mongo.replica == 3
   girder:
-    image: wholetale/girder:latest
+    image: wholetale/girder:${version}
     networks:
       - celery
       - traefik-net
       - mongo
+    volumes:
+      - "/mnt/homes:/tmp/wt-home-dirs"
+      - "/mnt/homes:/tmp/wt-tale-dirs"
     deploy:
       replicas: 1
       labels:
@@ -109,7 +112,7 @@ services:
         - "traefik.enable=false"
 
   dashboard:
-    image: wholetale/dashboard:stable
+    image: wholetale/dashboard:${version}
     networks:
       - traefik-net
     environment:
