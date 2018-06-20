@@ -106,3 +106,13 @@ variable "version" {
    default = "latest"
    description = "Docker component versions"
 }
+
+variable "monitoring_api_key" {
+   default = ""
+   description = "Girder API key for monitoring"
+}
+
+variable "monitoring_tale_id" {
+   default = "59f0b91584b7920001b46f2e" 
+   description = "Tale ID used for monitoring (default production Ligo Tale)"
+}

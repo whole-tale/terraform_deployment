@@ -7,7 +7,7 @@ networks:
 
 services:
   checkmk-agent:
-    image: wholetale/check_mk:latest
+    image: wholetale/check_mk:${version}
     networks:
       - outside
     volumes:
@@ -16,3 +16,6 @@ services:
       mode: global
     environment:
       - NAMESPACE=wt
+      - GIRDER_URL=https://girder.${subdomain}.${domain}
+      - GIRDER_API_KEY=${monitoring_api_key}
+      - TALE_ID=${monitoring_tale_id}
