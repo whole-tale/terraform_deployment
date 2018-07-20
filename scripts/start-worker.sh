@@ -20,9 +20,11 @@ docker run \
     -e GIRDER_API_URL=https://girder.${domain}/api/v1 \
     -e HOSTDIR=/host \
     -e TRAEFIK_NETWORK=wt_traefik-net \
+    -e TRAEFIK_ENTRYPOINT=https \
     -e REGISTRY_USER=${registry_user} \
     -e REGISTRY_URL=https://registry.${domain} \
     -e REGISTRY_PASS=${registry_pass} \
+    -e DOMAIN=${domain} \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/host \
     -v /var/cache/davfs2:/var/cache/davfs2 \
