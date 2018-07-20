@@ -98,7 +98,6 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
-        - "traefik.frontend.entryPoints=https"
       placement:
         constraints:
           - node.labels.storage == 1
@@ -125,7 +124,6 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
-        - "traefik.frontend.entryPoints=https"
 
   registry:
     image: registry:2.6
@@ -146,7 +144,6 @@ services:
         - "traefik.frontend.rule=Host:registry.${subdomain}.${domain}"
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
-        - "traefik.frontend.entryPoints=https"
       placement:
         constraints:
           - node.labels.storage == 1
