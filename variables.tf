@@ -103,6 +103,6 @@ variable "godaddy_api_secret" {
 }
 
 variable "version" {
-   default = "latest"
+   default = "v0.4"
    description = "Docker component versions"
 }
