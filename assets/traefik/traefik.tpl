@@ -29,9 +29,6 @@ storage = "/acme/acme.json"
 entryPoint = "https"
 acmeLogging = true
 
-[acme.httpChallenge]
-entryPoint = "http"
-
 [acme.dnsChallenge]
 provider = "godaddy"
 delayBeforeCheck = 0
