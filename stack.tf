@@ -20,6 +20,18 @@ data "template_file" "stack" {
   }
 }
 
+data "template_file" "monitoring" {
+  template = "${file("${path.module}/stacks/monitoring/monitoring.tpl")}"
+
+  vars {
+    domain = "${var.domain}"
+    subdomain = "${var.subdomain}"
+    version = "${var.version}"
+    monitoring_api_key = "${var.monitoring_api_key}"
+    monitoring_tale_id = "${var.monitoring_tale_id}"
+  }
+}
+
 resource "null_resource" "label_nodes" {
   depends_on = ["null_resource.provision_slave", "null_resource.provision_fileserver"]
 
@@ -69,7 +81,7 @@ resource "null_resource" "deploy_stack" {
   }
 
   provisioner "file" {
-    source = "stacks/monitoring/monitoring.yaml"
+    content = "${data.template_file.monitoring.rendered}"
     destination = "/home/core/wholetale/monitoring.yaml"
   }
 
