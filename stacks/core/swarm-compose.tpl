@@ -116,6 +116,8 @@ services:
       - traefik-net
     environment:
       - GIRDER_API_URL=https://girder.${subdomain}.${domain}
+      - DASHBOARD_URL=https://dashboard.${subdomain}.${domain}
+      - DATAONE_URL=${dataone_url}
     deploy:
       replicas: 1
       labels:

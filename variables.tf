@@ -106,3 +106,8 @@ variable "version" {
    default = "latest"
    description = "Docker component versions"
 }
+
+variable "dataone_url" {
+   default = "https://dev.nceas.ucsb.edu/cn/v2"
+   description = "DataONE member node URL"
+}
