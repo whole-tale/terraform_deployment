@@ -90,6 +90,7 @@ services:
     volumes:
       - "/mnt/homes:/tmp/wt-home-dirs"
       - "/mnt/homes:/tmp/wt-tale-dirs"
+      - "/mnt/dms:/tmp/ps"
     deploy:
       replicas: 1
       labels:
