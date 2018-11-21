@@ -11,6 +11,13 @@ resource "openstack_blockstorage_volume_v2" "registry-vol" {
   size = "${var.nfs_volume_size}"
 }
 
+resource "openstack_blockstorage_volume_v2" "dms-vol" {
+  depends_on = ["openstack_blockstorage_volume_v2.registry-vol"]
+  name = "${var.cluster_name}-dms-vol"
+  description = "Shared volume for DMS Private Storage"
+  size = "${var.nfs_volume_size}"
+}
+
 resource "openstack_compute_instance_v2" "fileserver" {
   name = "${var.cluster_name}-nfs"
   image_name = "${var.image}"
@@ -39,6 +46,12 @@ resource "openstack_compute_volume_attach_v2" "registry-vol" {
   volume_id   = "${openstack_blockstorage_volume_v2.registry-vol.id}"
 }
 
+resource "openstack_compute_volume_attach_v2" "dms-vol" {
+  depends_on = ["openstack_compute_instance_v2.fileserver", "openstack_blockstorage_volume_v2.dms-vol"]
+  instance_id = "${openstack_compute_instance_v2.fileserver.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.dms-vol.id}"
+}
+
 output "Registry device" {
   value = "${openstack_compute_volume_attach_v2.registry-vol.device}"
 }
@@ -47,8 +60,12 @@ output "Home device" {
   value = "${openstack_compute_volume_attach_v2.homes-vol.device}"
 }
 
+output "DMS device" {
+  value = "${openstack_compute_volume_attach_v2.dms-vol.device}"
+}
+
 resource "null_resource" "provision_fileserver" {
-  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_master", "openstack_compute_volume_attach_v2.homes-vol", "openstack_compute_volume_attach_v2.registry-vol"]
+  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_master", "openstack_compute_volume_attach_v2.homes-vol", "openstack_compute_volume_attach_v2.registry-vol", "openstack_compute_volume_attach_v2.dms-vol"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
@@ -105,6 +122,7 @@ resource "null_resource" "provision_fileserver" {
       "chmod +x /home/core/wholetale/init-backup.sh",
       "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
       "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
+      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.dms-vol.device} -m /mnt/dms -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
       "sudo /home/core/wholetale/init-backup.sh ${var.cluster_name}"
     ]
   }
