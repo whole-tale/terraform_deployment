@@ -87,6 +87,8 @@ services:
       - celery
       - traefik-net
       - mongo
+    environment:
+      - DASHBOARD_URL=https://dashboard.${subdomain}.${domain}
     volumes:
       - "/mnt/homes:/tmp/wt-home-dirs"
       - "/mnt/homes:/tmp/wt-tale-dirs"
