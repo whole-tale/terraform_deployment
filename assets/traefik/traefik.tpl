@@ -34,20 +34,14 @@ provider = "godaddy"
 delayBeforeCheck = 0
 
 [[acme.domains]]
-main = "*.${subdomain}.${domain}"
-
-[[acme.domains]]
-main = "dashboard-${subdomain}.${domain}"
-
-[[acme.domains]]
-main = "data.${domain}"
+main = "*.${domain}"
 
 [web]
 address = ":8080"
 
 [docker]
 endpoint = "unix:///var/run/docker.sock"
-domain = "${subdomain}.${domain}"
+domain = "${domain}"
 watch = true
 exposedbydefault = true
 swarmmode = true

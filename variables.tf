@@ -62,11 +62,6 @@ variable "domain" {
     description = "Site domain name"
 }
 
-variable "subdomain" {
-    default = "dev"
-    description = "Site subdomain name"
-}
-
 variable "globus_client_id" {
     default = ""
     description = "Globus client ID"
