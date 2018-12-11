@@ -96,7 +96,7 @@ services:
     deploy:
       replicas: 1
       labels:
-        - "traefik.frontend.rule=Host:girder.${subdomain}.${domain}"
+        - "traefik.frontend.rule=Host:girder.${subdomain}.${domain},data.${domain}"
         - "traefik.port=8080"
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"

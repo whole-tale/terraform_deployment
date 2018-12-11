@@ -39,6 +39,9 @@ main = "*.${subdomain}.${domain}"
 [[acme.domains]]
 main = "dashboard-${subdomain}.${domain}"
 
+[[acme.domains]]
+main = "data.${domain}"
+
 [web]
 address = ":8080"
 
