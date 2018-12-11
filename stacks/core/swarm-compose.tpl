@@ -89,6 +89,8 @@ services:
       - mongo
     environment:
       - DASHBOARD_URL=https://dashboard.${subdomain}.${domain}
+      - GOSU_USER=girder:girder
+      - "GOSU_CHOWN=/tmp/wt-home-dirs /tmp/wt-tale-dirs /tmp/ps"
     volumes:
       - "/mnt/homes:/tmp/wt-home-dirs"
       - "/mnt/homes:/tmp/wt-tale-dirs"
