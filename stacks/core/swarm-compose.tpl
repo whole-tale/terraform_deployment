@@ -88,7 +88,7 @@ services:
       - traefik-net
       - mongo
     environment:
-      - DASHBOARD_URL=https://dashboard.${subdomain}.${domain}
+      - DASHBOARD_URL=https://dashboard.${domain}
       - GOSU_USER=girder:girder
       - "GOSU_CHOWN=/tmp/wt-home-dirs /tmp/wt-tale-dirs /tmp/ps"
     volumes:
@@ -98,7 +98,7 @@ services:
     deploy:
       replicas: 1
       labels:
-        - "traefik.frontend.rule=Host:girder.${subdomain}.${domain},data.${domain}"
+        - "traefik.frontend.rule=Host:girder.${domain},data.${domain}"
         - "traefik.port=8080"
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"
@@ -120,14 +120,14 @@ services:
     networks:
       - traefik-net
     environment:
-      - GIRDER_API_URL=https://girder.${subdomain}.${domain}
-      - DASHBOARD_URL=https://dashboard.${subdomain}.${domain}
+      - GIRDER_API_URL=https://girder.${domain}
+      - DASHBOARD_URL=https://dashboard.${domain}
       - DATAONE_URL=${dataone_url}
     deploy:
       replicas: 1
       labels:
         - "traefik.port=80"
-        - "traefik.frontend.rule=Host:dashboard.${subdomain}.${domain}"
+        - "traefik.frontend.rule=Host:dashboard.${domain}"
         - "traefik.enable=true"
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
@@ -148,7 +148,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.port=5000"
-        - "traefik.frontend.rule=Host:registry.${subdomain}.${domain}"
+        - "traefik.frontend.rule=Host:registry.${domain}"
         - "traefik.docker.network=wt_traefik-net"
         - "traefik.frontend.passHostHeader=true"
       placement:
