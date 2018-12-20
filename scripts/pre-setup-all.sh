@@ -17,3 +17,6 @@ docker network create \
 sudo sh -c "printf '[Journal]\nSystemMaxUse=500\n' > /etc/systemd/journald.conf"
 
 sudo systemctl restart systemd-journald
+
+# Set the timezone
+sudo timedatectl set-timezone America/Chicago
