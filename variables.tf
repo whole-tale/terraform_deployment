@@ -62,11 +62,6 @@ variable "domain" {
     description = "Site domain name"
 }
 
-variable "subdomain" {
-    default = "dev"
-    description = "Site subdomain name"
-}
-
 variable "globus_client_id" {
     default = ""
     description = "Globus client ID"
@@ -105,4 +100,9 @@ variable "godaddy_api_secret" {
 variable "version" {
    default = "latest"
    description = "Docker component versions"
+}
+
+variable "dataone_url" {
+   default = "https://dev.nceas.ucsb.edu/cn/v2"
+   description = "DataONE member node URL"
 }

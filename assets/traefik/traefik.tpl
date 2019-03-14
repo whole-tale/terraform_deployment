@@ -20,10 +20,8 @@ defaultEntryPoints = ["http", "https"]
   [entryPoints.https]
   address = ":443"
     [entryPoints.https.tls]
-    #MinVersion = "VersionTLS12"
-    #CipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"]
-    MinVersion = "VersionTLS10"
-    CipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"]
+    MinVersion = "VersionTLS11"
+    CipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"]
 
 [acme]
 email = "bgates@microsoft.com"   # FIXME
@@ -31,25 +29,19 @@ storage = "/acme/acme.json"
 entryPoint = "https"
 acmeLogging = true
 
-[acme.httpChallenge]
-entryPoint = "http"
-
 [acme.dnsChallenge]
 provider = "godaddy"
 delayBeforeCheck = 0
 
 [[acme.domains]]
-main = "*.${subdomain}.${domain}"
-
-[[acme.domains]]
-main = "dashboard-${subdomain}.${domain}"
+main = "*.${domain}"
 
 [web]
 address = ":8080"
 
 [docker]
 endpoint = "unix:///var/run/docker.sock"
-domain = "${subdomain}.${domain}"
+domain = "${domain}"
 watch = true
 exposedbydefault = true
 swarmmode = true
