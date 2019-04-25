@@ -9,7 +9,7 @@ resource "openstack_networking_subnet_v2"  "ext_net_subnet" {
   cidr       = "${var.external_subnet}"
   ip_version = 4
   enable_dhcp = "true"
-  dns_nameservers = ["8.8.8.8", "8.8.8.4"]
+  dns_nameservers = ["8.8.8.8", "8.8.4.4"]
 }
 
 resource "openstack_networking_router_v2" "ext_router" {
@@ -35,5 +35,5 @@ resource "openstack_networking_subnet_v2"  "int_net_subnet" {
   ip_version = 4
   enable_dhcp = "true"
   no_gateway = "true"
-  dns_nameservers = ["8.8.8.8", "8.8.8.4"]
+  dns_nameservers = ["8.8.8.8", "8.8.4.4"]
 }
