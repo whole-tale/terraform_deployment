@@ -106,3 +106,8 @@ variable "dataone_url" {
    default = "https://dev.nceas.ucsb.edu/cn/v2"
    description = "DataONE member node URL"
 }
+
+variable "dashboard_dev" {
+   default = "false"
+   description = "Flag that represents whether this is a production environment"
+}
