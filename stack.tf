@@ -19,12 +19,12 @@ data "template_file" "stack" {
 }
 
 resource "null_resource" "label_nodes" {
-  depends_on = ["null_resource.provision_slave", "null_resource.provision_fileserver"]
+  depends_on = ["null_resource.provision_worker", "null_resource.provision_fileserver"]
 
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
-    host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
+    host = "${openstack_networking_floatingip_v2.swarm_manager_ip.address}"
   }
 
   provisioner "file" {
@@ -47,7 +47,7 @@ resource "null_resource" "deploy_stack" {
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
-    host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
+    host = "${openstack_networking_floatingip_v2.swarm_manager_ip.address}"
   }
 
   provisioner "remote-exec" {
@@ -111,12 +111,12 @@ resource "null_resource" "deploy_stack" {
 
 
 resource "null_resource" "start_worker" {
-  count = "${var.num_slaves}"
+  count = "${var.num_workers}"
   depends_on = ["null_resource.deploy_stack"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
-    host = "${element(openstack_networking_floatingip_v2.swarm_slave_ip.*.address, count.index)}"
+    host = "${element(openstack_networking_floatingip_v2.swarm_worker_ip.*.address, count.index)}"
   }
 
   provisioner "remote-exec" {

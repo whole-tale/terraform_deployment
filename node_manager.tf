@@ -1,15 +1,15 @@
-resource "openstack_compute_instance_v2" "swarm_master" {
+resource "openstack_compute_instance_v2" "swarm_manager" {
   name = "${var.cluster_name}-00"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
 
   network {
-    port = "${openstack_networking_port_v2.master_ext_port.id}"
+    port = "${openstack_networking_port_v2.manager_ext_port.id}"
   }
 
   network {
-    port = "${openstack_networking_port_v2.master_mgmt_port.id}"
+    port = "${openstack_networking_port_v2.manager_mgmt_port.id}"
   }
 }
 
@@ -28,16 +28,16 @@ resource "openstack_compute_volume_attach_v2" "manager-docker-vol" {
 
 /* trick for provisioning after we get a floating ip */
 
-resource "null_resource" "provision_master" {
-  depends_on = ["openstack_compute_floatingip_associate_v2.fip_master"]
+resource "null_resource" "provision_manager" {
+  depends_on = ["openstack_compute_floatingip_associate_v2.fip_manager"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
-    host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
+    host = "${openstack_networking_floatingip_v2.swarm_manager_ip.address}"
   }
 
   provisioner "remote-exec" {
-    inline = ["sudo hostnamectl set-hostname ${openstack_compute_instance_v2.swarm_master.name}"]
+    inline = ["sudo hostnamectl set-hostname ${openstack_compute_instance_v2.swarm_manager.name}"]
   }
 
   provisioner "remote-exec" {
@@ -58,8 +58,8 @@ resource "null_resource" "provision_master" {
   }
 
   provisioner "file" {
-    source = "scripts/post-setup-master.sh"
-    destination = "/home/ubuntu/wholetale/post-setup-master.sh"
+    source = "scripts/post-setup-manager.sh"
+    destination = "/home/ubuntu/wholetale/post-setup-manager.sh"
   }
 
   provisioner "remote-exec" {
@@ -73,22 +73,22 @@ resource "null_resource" "provision_master" {
 
   provisioner "remote-exec" {
     inline = [
-      "docker swarm init --advertise-addr ${openstack_compute_instance_v2.swarm_master.access_ip_v4} --listen-addr ${openstack_compute_instance_v2.swarm_master.access_ip_v4}:2377"
+      "docker swarm init --advertise-addr ${openstack_compute_instance_v2.swarm_manager.access_ip_v4} --listen-addr ${openstack_compute_instance_v2.swarm_manager.access_ip_v4}:2377"
     ]
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/ubuntu/wholetale/post-setup-master.sh",
-      "/home/ubuntu/wholetale/post-setup-master.sh"
+      "chmod +x /home/ubuntu/wholetale/post-setup-manager.sh",
+      "/home/ubuntu/wholetale/post-setup-manager.sh"
     ]
   }
 }
 
 data "external" "swarm_join_token" {
-  depends_on = ["null_resource.provision_master"]
+  depends_on = ["null_resource.provision_manager"]
   program = ["./scripts/get-token.sh"]
   query = {
-    host = "${openstack_networking_floatingip_v2.swarm_master_ip.address}"
+    host = "${openstack_networking_floatingip_v2.swarm_manager_ip.address}"
   }
 }

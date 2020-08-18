@@ -47,9 +47,9 @@ variable "cluster_name" {
     description = "Cluster name"
 }
 
-variable "num_slaves" {
+variable "num_workers" {
     default = 3
-    description = "Number of slave nodes"
+    description = "Number of worker nodes"
 }
 
 variable "domain" {

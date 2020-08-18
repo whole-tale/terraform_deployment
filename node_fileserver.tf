@@ -64,7 +64,7 @@ output "DMS device" {
 }
 
 resource "null_resource" "provision_fileserver" {
-  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_master", "openstack_compute_volume_attach_v2.homes-vol", "openstack_compute_volume_attach_v2.registry-vol", "openstack_compute_volume_attach_v2.dms-vol"]
+  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_manager", "openstack_compute_volume_attach_v2.homes-vol", "openstack_compute_volume_attach_v2.registry-vol", "openstack_compute_volume_attach_v2.dms-vol"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
@@ -97,7 +97,7 @@ resource "null_resource" "provision_fileserver" {
 
   provisioner "remote-exec" {
     inline = [
-      "docker swarm join --token ${data.external.swarm_join_token.result.worker} ${openstack_compute_instance_v2.swarm_master.access_ip_v4}"
+      "docker swarm join --token ${data.external.swarm_join_token.result.worker} ${openstack_compute_instance_v2.swarm_manager.access_ip_v4}"
     ]
   }
 

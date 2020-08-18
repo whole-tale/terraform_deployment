@@ -1,5 +1,5 @@
-resource "openstack_compute_instance_v2" "swarm_slave" {
-  count = "${var.num_slaves}"
+resource "openstack_compute_instance_v2" "swarm_worker" {
+  count = "${var.num_workers}"
   name = "${format("${var.cluster_name}-%02d", count.index + 1)}"
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
@@ -28,17 +28,17 @@ resource "openstack_compute_volume_attach_v2" "worker-docker-vol" {
   volume_id   = "${element(openstack_blockstorage_volume_v2.worker-docker-vol.*.id, count.index)}"
 }
 
-resource "null_resource" "provision_slave" {
-  count = "${var.num_slaves}"
-  depends_on = ["openstack_networking_floatingip_v2.swarm_slave_ip", "null_resource.provision_master"]
+resource "null_resource" "provision_worker" {
+  count = "${var.num_workers}"
+  depends_on = ["openstack_networking_floatingip_v2.swarm_worker_ip", "null_resource.provision_manager"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
-    host = "${element(openstack_networking_floatingip_v2.swarm_slave_ip.*.address, count.index)}"
+    host = "${element(openstack_networking_floatingip_v2.swarm_worker_ip.*.address, count.index)}"
   }
 
   provisioner "remote-exec" {
-    inline = ["sudo hostnamectl set-hostname ${element(openstack_compute_instance_v2.swarm_slave.*.name, count.index)}"]
+    inline = ["sudo hostnamectl set-hostname ${element(openstack_compute_instance_v2.swarm_worker.*.name, count.index)}"]
   }
 
   provisioner "remote-exec" {
@@ -69,7 +69,7 @@ resource "null_resource" "provision_slave" {
 
   provisioner "remote-exec" {
     inline = [
-      "docker swarm join --token ${data.external.swarm_join_token.result.worker} ${openstack_compute_instance_v2.swarm_master.access_ip_v4}"
+      "docker swarm join --token ${data.external.swarm_join_token.result.worker} ${openstack_compute_instance_v2.swarm_manager.access_ip_v4}"
     ]
   }
 }
