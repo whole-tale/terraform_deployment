@@ -80,7 +80,7 @@ resource "null_resource" "provision_master" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/ubuntu/wholetale/post-setup-master.sh",
-      "/home/ubuntu/wholetale/post-setup-master.sh ${var.docker_mtu}"
+      "/home/ubuntu/wholetale/post-setup-master.sh"
     ]
   }
 }

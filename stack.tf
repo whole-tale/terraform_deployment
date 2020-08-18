@@ -11,7 +11,6 @@ data "template_file" "stack" {
 
   vars {
     domain = "${var.domain}"
-    mtu = "${var.docker_mtu}"
     version = "${var.version}"
     godaddy_api_key = "${var.godaddy_api_key}"
     godaddy_api_secret = "${var.godaddy_api_secret}"

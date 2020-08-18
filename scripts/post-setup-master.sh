@@ -14,7 +14,7 @@ echo "Creating ingress network"
 docker network create \
   -d overlay \
   --ingress \
-  --opt com.docker.network.driver.mtu=${mtu} \
+  --opt com.docker.network.driver.mtu=${docker_mtu} \
   ingress
 
 

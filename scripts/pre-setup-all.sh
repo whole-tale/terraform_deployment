@@ -80,7 +80,7 @@ sudo docker network create \
   --opt com.docker.network.bridge.name=docker_gwbridge \
   --opt com.docker.network.bridge.enable_icc=false \
   --opt com.docker.network.bridge.enable_ip_masquerade=true \
-  --opt com.docker.network.driver.mtu=${mtu} \
+  --opt com.docker.network.driver.mtu=${docker_mtu} \
   docker_gwbridge
 
 

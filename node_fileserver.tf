@@ -91,7 +91,7 @@ resource "null_resource" "provision_fileserver" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/ubuntu/wholetale/pre-setup-all.sh",
-      "/home/ubuntu/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+      "/home/ubuntu/wholetale/pre-setup-all.sh"
     ]
   }
 

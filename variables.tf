@@ -52,11 +52,6 @@ variable "num_slaves" {
     description = "Number of slave nodes"
 }
 
-variable "docker_mtu" {
-    default = "1454"
-    description = "Docker MTU"
-}
-
 variable "domain" {
     default = "wholetale.org"
     description = "Site domain name"

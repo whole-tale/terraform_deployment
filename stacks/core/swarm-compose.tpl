@@ -3,17 +3,11 @@ version: "3.2"
 networks:
   traefik-net:
     driver: overlay
-    driver_opts:
-      com.docker.network.driver.mtu: ${mtu}
   mongo:
     driver: overlay
-    driver_opts:
-      com.docker.network.driver.mtu: ${mtu}
     attachable: true
   celery:
     driver: overlay
-    driver_opts:
-      com.docker.network.driver.mtu: ${mtu}
     attachable: true
 
 volumes:
