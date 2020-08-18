@@ -30,19 +30,19 @@ resource "null_resource" "provision_slave" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/core/wholetale/"
+      "mkdir -p /home/ubuntu/wholetale/"
     ]
   }
 
   provisioner "file" {
     source = "scripts/pre-setup-all.sh"
-    destination = "/home/core/wholetale/pre-setup-all.sh"
+    destination = "/home/ubuntu/wholetale/pre-setup-all.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/pre-setup-all.sh",
-      "/home/core/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+      "chmod +x /home/ubuntu/wholetale/pre-setup-all.sh",
+      "/home/ubuntu/wholetale/pre-setup-all.sh ${var.docker_mtu}"
     ]
   }
 

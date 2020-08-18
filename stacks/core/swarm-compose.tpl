@@ -31,8 +31,8 @@ services:
       - traefik-net
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/home/core/wholetale/traefik:/etc/traefik"
-      - "/home/core/wholetale/traefik/acme:/acme"
+      - "/home/ubuntu/wholetale/traefik:/etc/traefik"
+      - "/home/ubuntu/wholetale/traefik/acme:/acme"
     environment:
       - GODADDY_API_KEY=${godaddy_api_key}
       - GODADDY_API_SECRET=${godaddy_api_secret}

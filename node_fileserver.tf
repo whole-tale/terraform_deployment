@@ -78,20 +78,20 @@ resource "null_resource" "provision_fileserver" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/core/wholetale/",
-      "mkdir -p /home/core/rclone/",
+      "mkdir -p /home/ubuntu/wholetale/",
+      "mkdir -p /home/ubuntu/rclone/",
     ]
   }
 
   provisioner "file" {
     source = "scripts/pre-setup-all.sh"
-    destination = "/home/core/wholetale/pre-setup-all.sh"
+    destination = "/home/ubuntu/wholetale/pre-setup-all.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/pre-setup-all.sh",
-      "/home/core/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+      "chmod +x /home/ubuntu/wholetale/pre-setup-all.sh",
+      "/home/ubuntu/wholetale/pre-setup-all.sh ${var.docker_mtu}"
     ]
   }
 
@@ -103,27 +103,27 @@ resource "null_resource" "provision_fileserver" {
 
   provisioner "file" {
     source = "scripts/nfs-init.sh"
-    destination = "/home/core/wholetale/nfs-init.sh"
+    destination = "/home/ubuntu/wholetale/nfs-init.sh"
   }
 
   provisioner "file" {
     source = "scripts/init-backup.sh"
-    destination = "/home/core/wholetale/init-backup.sh"
+    destination = "/home/ubuntu/wholetale/init-backup.sh"
   }
 
   provisioner "file" {
     source = "rclone.conf"
-    destination = "/home/core/rclone/rclone.conf"
+    destination = "/home/ubuntu/rclone/rclone.conf"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/nfs-init.sh",
-      "chmod +x /home/core/wholetale/init-backup.sh",
-      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
-      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
-      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.dms-vol.device} -m /mnt/dms -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
-      "sudo /home/core/wholetale/init-backup.sh ${var.cluster_name}"
+      "chmod +x /home/ubuntu/wholetale/nfs-init.sh",
+      "chmod +x /home/ubuntu/wholetale/init-backup.sh",
+      "sudo /home/ubuntu/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
+      "sudo /home/ubuntu/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
+      "sudo /home/ubuntu/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.dms-vol.device} -m /mnt/dms -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
+      "sudo /home/ubuntu/wholetale/init-backup.sh ${var.cluster_name}"
     ]
   }
 

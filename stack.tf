@@ -53,59 +53,59 @@ resource "null_resource" "deploy_stack" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/core/wholetale/traefik/acme"
+      "mkdir -p /home/ubuntu/wholetale/traefik/acme"
     ]
   }
 
   provisioner "file" {
     source = "assets/traefik/acme/acme.json"
-    destination = "/home/core/wholetale/traefik/acme/acme.json"
+    destination = "/home/ubuntu/wholetale/traefik/acme/acme.json"
   }
 
   provisioner "file" {
     content = "${data.template_file.stack.rendered}"
-    destination = "/home/core/wholetale/swarm-compose.yaml"
+    destination = "/home/ubuntu/wholetale/swarm-compose.yaml"
   }
 
   provisioner "file" {
     source = "stacks/monitoring/monitoring.yaml"
-    destination = "/home/core/wholetale/monitoring.yaml"
+    destination = "/home/ubuntu/wholetale/monitoring.yaml"
   }
 
   provisioner "file" {
     content      = "${data.template_file.traefik.rendered}"
-    destination = "/home/core/wholetale/traefik/traefik.toml"
+    destination = "/home/ubuntu/wholetale/traefik/traefik.toml"
   }
 
   provisioner "file" {
     source = "scripts/start-worker.sh"
-    destination = "/home/core/wholetale/start-worker.sh"
+    destination = "/home/ubuntu/wholetale/start-worker.sh"
   }
 
   provisioner "file" {
     source = "scripts/init-mongo.sh"
-    destination = "/home/core/wholetale/init-mongo.sh"
+    destination = "/home/ubuntu/wholetale/init-mongo.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod 600 /home/core/wholetale/traefik/acme/acme.json",
-      "docker stack deploy --compose-file /home/core/wholetale/swarm-compose.yaml wt",
-      "docker stack deploy --compose-file /home/core/wholetale/monitoring.yaml omd"
+      "chmod 600 /home/ubuntu/wholetale/traefik/acme/acme.json",
+      "docker stack deploy --compose-file /home/ubuntu/wholetale/swarm-compose.yaml wt",
+      "docker stack deploy --compose-file /home/ubuntu/wholetale/monitoring.yaml omd"
     ]
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/init-mongo.sh",
-      "/home/core/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret}"
+      "chmod +x /home/ubuntu/wholetale/init-mongo.sh",
+      "/home/ubuntu/wholetale/init-mongo.sh ${var.domain} ${var.globus_client_id} ${var.globus_client_secret}"
     ]
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/start-worker.sh",
-      "/home/core/wholetale/start-worker.sh ${var.domain} manager ${var.registry_user} ${var.registry_pass} ${var.version}"
+      "chmod +x /home/ubuntu/wholetale/start-worker.sh",
+      "/home/ubuntu/wholetale/start-worker.sh ${var.domain} manager ${var.registry_user} ${var.registry_pass} ${var.version}"
     ]
   }
 }
@@ -122,19 +122,19 @@ resource "null_resource" "start_worker" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/core/wholetale/"
+      "mkdir -p /home/ubuntu/wholetale/"
     ]
   }
 
   provisioner "file" {
     source = "scripts/start-worker.sh"
-    destination = "/home/core/wholetale/start-worker.sh"
+    destination = "/home/ubuntu/wholetale/start-worker.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/start-worker.sh",
-      "/home/core/wholetale/start-worker.sh ${var.domain} celery ${var.registry_user} ${var.registry_pass} ${var.version}"
+      "chmod +x /home/ubuntu/wholetale/start-worker.sh",
+      "/home/ubuntu/wholetale/start-worker.sh ${var.domain} celery ${var.registry_user} ${var.registry_pass} ${var.version}"
     ]
   }
 }
