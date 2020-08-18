@@ -3,7 +3,6 @@ resource "openstack_compute_instance_v2" "swarm_master" {
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
-  user_data = "${file("config.ign")}"
 
   network {
     port = "${openstack_networking_port_v2.master_ext_port.id}"
@@ -13,6 +12,19 @@ resource "openstack_compute_instance_v2" "swarm_master" {
     port = "${openstack_networking_port_v2.master_mgmt_port.id}"
   }
 }
+
+resource "openstack_blockstorage_volume_v2" "manager-docker-vol" {
+  name = "${var.cluster_name}-00-docker-vol"
+  description = "Shared volume for Docker image cache"
+  size = "${var.docker_volume_size}"
+}
+
+resource "openstack_compute_volume_attach_v2" "manager-docker-vol" {
+  depends_on = ["openstack_compute_instance_v2.swarm_manager", "openstack_blockstorage_volume_v2.manager-docker-vol"]
+  instance_id = "${openstack_compute_instance_v2.swarm_manager.id}"
+  volume_id   = "${openstack_blockstorage_volume_v2.manager-docker-vol.id}"
+}
+
 
 /* trick for provisioning after we get a floating ip */
 
@@ -30,8 +42,14 @@ resource "null_resource" "provision_master" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/ubuntu/wholetale/"
+      "mkdir -p /home/ubuntu/wholetale/",
+      "mkdir -p /home/ubuntu/.ssh/"
     ]
+  }
+
+  provisioner "file" {
+    source = "scripts/fs-init.sh"
+    destination = "/home/ubuntu/wholetale/fs-init.sh"
   }
 
   provisioner "file" {
@@ -47,7 +65,9 @@ resource "null_resource" "provision_master" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/ubuntu/wholetale/pre-setup-all.sh",
-      "/home/ubuntu/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+      "chmod +x /home/ubuntu/wholetale/fs-init.sh",
+      "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.manager-docker-vol.device} -m /mnt/docker",
+      "/home/ubuntu/wholetale/pre-setup-all.sh"
     ]
   }
 
