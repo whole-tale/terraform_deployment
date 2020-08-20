@@ -1,3 +1,5 @@
+#!/bin/bash
+
 nfs_host=$1
 
 # Label the manager node as a mongo replica

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 domain=$1 
 role=$2
