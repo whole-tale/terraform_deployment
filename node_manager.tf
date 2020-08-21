@@ -66,7 +66,7 @@ resource "null_resource" "provision_manager" {
     inline = [
       "chmod +x /home/ubuntu/wholetale/pre-setup-all.sh",
       "chmod +x /home/ubuntu/wholetale/fs-init.sh",
-      "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.manager-docker-vol.device} -m /mnt/docker",
+      "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.manager-docker-vol.device} -m /var/lib/docker",
       "/home/ubuntu/wholetale/pre-setup-all.sh"
     ]
   }

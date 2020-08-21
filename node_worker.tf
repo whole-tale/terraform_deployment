@@ -62,7 +62,7 @@ resource "null_resource" "provision_worker" {
     inline = [
       "chmod +x /home/ubuntu/wholetale/pre-setup-all.sh",
       "chmod +x /home/ubuntu/wholetale/fs-init.sh",
-      "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${element(openstack_compute_volume_attach_v2.worker-docker-vol.*.device, count.index)} -m /mnt/docker",
+      "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${element(openstack_compute_volume_attach_v2.worker-docker-vol.*.device, count.index)} -m /var/lib/docker",
       "/home/ubuntu/wholetale/pre-setup-all.sh"
     ]
   }

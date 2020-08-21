@@ -16,6 +16,18 @@ net.ipv6.conf.all.disable_ipv6=1
 net.ipv6.conf.default.disable_ipv6=1
 EOF'
 
+# Disable systemd-resolved
+sudo bash -c 'cat << EOF > /etc/systemd/resolved.conf
+[Resolve]
+DNS=8.8.8.8
+FallbackDNS=8.8.4.4
+EOF'
+
+sudo systemctl restart systemd-resolved.service
+sudo rm /etc/resolv.conf
+sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
+
 # Configure Docker daemon
 docker_mtu=$(( `cat /sys/class/net/ens4/mtu` - 60 ))
 eth1_ipv4=`ip -o -4 addr list ens4 | awk '{print $4}' | cut -d/ -f1`
@@ -25,8 +37,7 @@ sudo bash -c "cat << EOF > /etc/docker/daemon.json
 {
    \"hosts\": [\"unix:///var/run/docker.sock\", \"tcp://${eth1_ipv4}:237\"],
    \"dns\": [\"8.8.8.8\", \"8.8.4.4\"],
-   \"mtu\": ${docker_mtu},
-   \"graph\": \"/mnt/docker\"
+   \"mtu\": ${docker_mtu}
 }
 EOF"
 
