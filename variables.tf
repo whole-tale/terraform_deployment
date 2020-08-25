@@ -68,8 +68,13 @@ variable "globus_client_secret" {
 }
 
 variable "nfs_volume_size" {
-    default =  40
+    default =  50
     description = "Fileserver volume size in GB"
+}
+
+variable "docker_volume_size" {
+    default =  50
+    description = "Docker volume size in GB"
 }
 
 variable "registry_user" {
