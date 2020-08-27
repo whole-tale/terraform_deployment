@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 domain=$1 
 role=$2
@@ -33,6 +33,7 @@ docker run \
     --cap-add SYS_ADMIN \
     --cap-add SYS_PTRACE \
     --network wt_celery \
+    --security-opt apparmor:unconfined \
     -d ${image} \
       -Q ${role},$(docker info --format "{{.Swarm.NodeID}}") \
       --hostname=$(docker info --format "{{.Swarm.NodeID}}")

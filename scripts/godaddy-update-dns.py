@@ -12,16 +12,24 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-k", "--key", required=True, help="Godaddy API key")
 parser.add_argument("-s", "--secret", required=True, help="Godaddy API secret")
 parser.add_argument("-d", "--domain", required=True, help="Domain name")
-parser.add_argument("-n", "--name", required=True, help="DNS A record entry name")
 parser.add_argument("-a", "--address", required=True, help="DNS A record ip address value")
-
 
 args = parser.parse_args()
 
+domain = args.domain
+
+# Use the domain argument to determine the wildcard address
+if domain == 'wholetale.org':
+    wildcard = "*"
+else:
+    wildcard = "*.%s" % (domain.replace(".wholetale.org", ""))
+
+domain = "wholetale.org"
+
 # Uses the records and A record enpoints
 baseUrl = "https://api.godaddy.com/v1"
-recordsUrl = "%s/domains/%s/records" % (baseUrl, args.domain)
-recordUrl = "%s/A/*.%s" % (recordsUrl, args.name)
+recordsUrl = "%s/domains/%s/records" % (baseUrl, domain)
+recordUrl = "%s/A/%s" % (recordsUrl, wildcard)
 
 # Authentication requires GoDaddy API key and secret
 authHeader = "sso-key %s:%s" % (args.key, args.secret)
@@ -29,7 +37,7 @@ authHeader = "sso-key %s:%s" % (args.key, args.secret)
 # DNS A record
 wildcard_record = [{
     'data': args.address,
-    'name': "*." + args.name,
+    'name': wildcard,
     'ttl': 600,
     'type': 'A'
 }]
@@ -46,7 +54,7 @@ try:
 
         if not body:
             #  If body is empty, no existing A record exists so created it using the PATCH method
-            print("No record found for *.%s, creating" % args.name)
+            print("No record found for %s, creating" % wildcard)
 
             r = requests.patch(recordsUrl, json=wildcard_record, headers={'Authorization': authHeader, 'accept': 'application/json'})
             if r.status_code == requests.codes.ok:
@@ -59,7 +67,7 @@ try:
             if body == wildcard_record:
                 print("Record found, but configuration unchanged")
             else:
-                print("Record found for %s, updating" % args.name)
+                print("Record found for %s, updating" % wildcard)
                 r = requests.put(recordUrl, json=wildcard_record, headers={'Authorization': authHeader, 'accept': 'application/json'})
 
                 if r.status_code == requests.codes.ok:

@@ -1,13 +1,11 @@
 #!/bin/bash
 
 device=""
-mount_path=""   # assumes /mnt/<name> TODO: Add sanity check
-export_path=""
-cidr_range=""
+mount_path=""   
 verbose=0
 
 usage() {
-      echo "Usage: `basename $0` -d device -m mount_path -e export_path -c cidr_range"
+      echo "Usage: `basename $0` -d device -m mount_path"
 }
 
 while getopts "h?vd:m:e:c:" opt; do
@@ -21,10 +19,6 @@ while getopts "h?vd:m:e:c:" opt; do
     d) device=$OPTARG
       ;;
     m) mount_path=$OPTARG
-      ;;
-    e) export_path=$OPTARG
-      ;;
-    c) cidr_range=$OPTARG
       ;;
     esac
 done
@@ -41,19 +35,7 @@ if [ ! $mount_path ]; then
   exit 1
 fi
 
-if [ ! $export_path ]; then
-  echo "You must speficy an export_path (-e)"
-  usage
-  exit 1
-fi
-
-if [ ! $cidr_range ]; then
-  echo "You must speficy an export CIDR range (-c)"
-  usage
-  exit 1
-fi
-
-echo "verbose=$verbose, device=$device, mount_path=$mount_path, export_path=$export_path, cidr_range=$cidr_range"
+echo "verbose=$verbose, device=$device, mount_path=$mount_path"
 
 
 # Check that block device exists
@@ -82,7 +64,8 @@ fi
 
 
 # Create systemd mount file
-cat << EOF >  /etc/systemd/system/mnt-${mount_path#/mnt/}.mount
+mnt_name=`echo "$mount_path" | sed "s?^/??g" | sed "s?/?-?g"`
+cat << EOF >  /etc/systemd/system/${mnt_name}.mount
 [Unit]
 Description=Mount $device on $mount_path
 After=local-fs.target
@@ -98,28 +81,14 @@ WantedBy=multi-user.target
 EOF
 
 # Enable mount file
-systemctl enable mnt-${mount_path#/mnt/}.mount
+systemctl enable ${mnt_name}.mount
 
 # Mount device to specified path
 if  ! mount | grep "^${device} " > /dev/null ; then
    if [ $verbose ]; then
       echo "Mounting ${device} to ${mount_path}"
    fi
-   systemctl start mnt-${mount_path#/mnt/}.mount
+   systemctl start ${mnt_name}.mount
 else
    echo "${device} already mounted"
 fi
-
-if  ! grep "^${mount_path}" /etc/exports > /dev/null ; then
-   if [ $verbose ]; then
-      echo "Creating /etc/exports entry"
-   fi
-   echo "${mount_path} ${cidr_range}(rw,async,fsid=0,async,no_subtree_check)" >> /etc/exports
-else
-   echo "Export exists for ${mount_path}"
-fi
-
-if [ $verbose ]; then
-   echo "Restarting rpc-mountd"
-fi
-systemctl start rpc-mountd

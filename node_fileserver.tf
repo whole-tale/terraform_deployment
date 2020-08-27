@@ -23,7 +23,6 @@ resource "openstack_compute_instance_v2" "fileserver" {
   image_name = "${var.image}"
   flavor_name = "${var.flavor}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
-  user_data = "${file("config.ign")}"
 
   network {
     port = "${openstack_networking_port_v2.fileserver_ext_port.id}"
@@ -65,7 +64,7 @@ output "DMS device" {
 }
 
 resource "null_resource" "provision_fileserver" {
-  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_master", "openstack_compute_volume_attach_v2.homes-vol", "openstack_compute_volume_attach_v2.registry-vol", "openstack_compute_volume_attach_v2.dms-vol"]
+  depends_on = ["openstack_compute_floatingip_associate_v2.fip_fileserver", "null_resource.provision_manager", "openstack_compute_volume_attach_v2.homes-vol", "openstack_compute_volume_attach_v2.registry-vol", "openstack_compute_volume_attach_v2.dms-vol"]
   connection {
     user = "${var.ssh_user_name}"
     private_key = "${file("${var.ssh_key_file}")}"
@@ -78,52 +77,53 @@ resource "null_resource" "provision_fileserver" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /home/core/wholetale/",
-      "mkdir -p /home/core/rclone/",
+      "mkdir -p /home/ubuntu/wholetale/",
+      "mkdir -p /home/ubuntu/rclone/",
+      "mkdir -p /home/ubuntu/.ssh/",
     ]
   }
 
   provisioner "file" {
     source = "scripts/pre-setup-all.sh"
-    destination = "/home/core/wholetale/pre-setup-all.sh"
+    destination = "/home/ubuntu/wholetale/pre-setup-all.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/pre-setup-all.sh",
-      "/home/core/wholetale/pre-setup-all.sh ${var.docker_mtu}"
+      "chmod +x /home/ubuntu/wholetale/pre-setup-all.sh",
+      "/home/ubuntu/wholetale/pre-setup-all.sh"
     ]
   }
 
   provisioner "remote-exec" {
     inline = [
-      "docker swarm join --token ${data.external.swarm_join_token.result.worker} ${openstack_compute_instance_v2.swarm_master.access_ip_v4}"
+      "docker swarm join --token ${data.external.swarm_join_token.result.worker} ${openstack_compute_instance_v2.swarm_manager.access_ip_v4}"
     ]
   }
 
   provisioner "file" {
-    source = "scripts/nfs-init.sh"
-    destination = "/home/core/wholetale/nfs-init.sh"
+    source = "scripts/fs-init.sh"
+    destination = "/home/ubuntu/wholetale/fs-init.sh"
   }
 
   provisioner "file" {
     source = "scripts/init-backup.sh"
-    destination = "/home/core/wholetale/init-backup.sh"
+    destination = "/home/ubuntu/wholetale/init-backup.sh"
   }
 
   provisioner "file" {
     source = "rclone.conf"
-    destination = "/home/core/rclone/rclone.conf"
+    destination = "/home/ubuntu/rclone/rclone.conf"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/core/wholetale/nfs-init.sh",
-      "chmod +x /home/core/wholetale/init-backup.sh",
-      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
-      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
-      "sudo /home/core/wholetale/nfs-init.sh -v -d ${openstack_compute_volume_attach_v2.dms-vol.device} -m /mnt/dms -e /share -c ${openstack_networking_subnet_v2.ext_net_subnet.cidr}",
-      "sudo /home/core/wholetale/init-backup.sh ${var.cluster_name}"
+      "chmod +x /home/ubuntu/wholetale/fs-init.sh",
+      "chmod +x /home/ubuntu/wholetale/init-backup.sh",
+      "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry",
+      "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes",
+      "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.dms-vol.device} -m /mnt/dms",
+      "sudo /home/ubuntu/wholetale/init-backup.sh ${var.cluster_name}"
     ]
   }
 

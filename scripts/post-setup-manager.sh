@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mtu=$1
+docker_mtu=$(( `cat /sys/class/net/ens4/mtu` - 60 ))
 
 # Create a default swarm bridge with proper MTU
 echo "Removing ingress network"
@@ -14,7 +14,7 @@ echo "Creating ingress network"
 docker network create \
   -d overlay \
   --ingress \
-  --opt com.docker.network.driver.mtu=${mtu} \
+  --opt com.docker.network.driver.mtu=${docker_mtu} \
   ingress
 
 

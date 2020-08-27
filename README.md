@@ -5,8 +5,7 @@ The following describes the basic process for deploying the Whole Tale services 
 ## What you'll need
 These are detailed below, but in short:
 * OpenStack project with API access (and the default MTU)
-* CoreOS image with at least Docker 17.09-ce (likely from [Alpha channel](https://alpha.release.core-os.net/amd64-usr/current/)).
-* [CoreOS Config Transpiler](https://github.com/coreos/container-linux-config-transpiler)
+* Ubuntu 20.04 LTS image 
 * Wildcard DNS for your domain
 * [Globus Auth client ID and secret](https://auth.globus.org/v2/web/developers)
 * rclone binary 
@@ -21,30 +20,12 @@ The deployment process currently requires access to an OpenStack project with AP
 If not available on your system, download the alpha channel CoreOS image and add to OpenStack using the ``glance`` client:
 
 ```bash
-wget https://alpha.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2
-glance image-create --name "Container-Linux (1576.1.0)" --container-format bare --disk-format qcow2 \
-       --file coreos_production_openstack_image.img
+wget https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+openstack image create  --container-format bare --disk-format qcow2  --file focal-server-cloudimg-amd64.img "Ubuntu 20.04 LTS"
 ```
 
 ## Globus authentication
 The ``globus_client_id`` and ``globus_client_secret`` can be obtained by setting up a custom application/service via the [Globus Auth developer tools](https://auth.globus.org/v2/web/developers).
-
-
-## CoreOS Ignition
-The deployment process uses CoreOS [Ignition](https://coreos.com/ignition/docs/latest/) to override some setting during the initial image boot process. This includes injecting authorized keys into instances and some settings including MTU and default nameserver.  Settings are stored in ``coreos.yaml``.
-
-You'll need to download the config transpiler and add it to your ``PATH``:
-```bash
-$ wget https://github.com/coreos/container-linux-config-transpiler/releases/download/v0.3.1/ct-v0.3.1-x86_64-unknown-linux-gnu
-$ mv ct-v0.3.1-x86_64-unknown-linux-gnu ct
-$ chmod +x ct
-```
-
-Then convert the ``coreos.yaml`` to ``config.ign``:
-
-```bash
-$ ct -platform openstack-metadata -in-file coreos.yaml -out-file config.ign
-```
 
 ## Setup rclone
 
@@ -88,11 +69,10 @@ The ``variables.tf`` file contains variables used during the deployment process.
 * flavor: Instance flavor in OpenStack
 * external_gateway: ID for external gateway from OpenStack
 * pool: Name of OpenStack floating IP pool
-* num_slaves: Number of Swarm worker nodes
+* num_workers: Number of Swarm worker nodes
 * domain: Domain name for Whole Tale deployment
 * globus_client_id: Globus auth client ID
 * globus_client_secret: Globus auth client secret
-* docker_mtu: Docker MTU for  OpenStack
 * godaddy_api_key:  GoDaddy API key
 * godaddy_api_secret: GoDaddy API secret
 
@@ -108,10 +88,10 @@ terraform apply
 What happens?
 * Creates OpenStack networks and security groups
 * Provisions VM instances and volumes
-* Creates Docker swarm cluster including master and n workers
+* Creates Docker swarm cluster including manager and n workers
 * Creates multiple Docker overlay networks
 * Deploys replicated Mongo database and restores from backup
 * Deploys traefik proxy with Let's Encrypy integration for TLS
-* Deploys Celery master and workers
+* Deploys Celery manager and workers
 * Deploys core Girder and Dashboard services
 

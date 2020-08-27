@@ -3,7 +3,7 @@ variable "region" {
 }
 
 variable "image" {
-    default = "Container-Linux (1562.0.0)"
+    default = "Ubuntu 20.04 LTS" 
     description = "openstack image list : Name"
 }
 
@@ -47,14 +47,9 @@ variable "cluster_name" {
     description = "Cluster name"
 }
 
-variable "num_slaves" {
+variable "num_workers" {
     default = 3
-    description = "Number of slave nodes"
-}
-
-variable "docker_mtu" {
-    default = "1454"
-    description = "Docker MTU"
+    description = "Number of worker nodes"
 }
 
 variable "domain" {
@@ -73,8 +68,13 @@ variable "globus_client_secret" {
 }
 
 variable "nfs_volume_size" {
-    default =  40
+    default =  50
     description = "Fileserver volume size in GB"
+}
+
+variable "docker_volume_size" {
+    default =  50
+    description = "Docker volume size in GB"
 }
 
 variable "registry_user" {
