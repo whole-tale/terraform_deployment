@@ -5,6 +5,7 @@ role=$2
 registry_user=$3
 registry_pass=$4
 version=$5
+matlab_installation_key=$6
 
 image=wholetale/gwvolman:${version}
 
@@ -20,11 +21,13 @@ docker run \
     -e GIRDER_API_URL=https://girder.${domain}/api/v1 \
     -e HOSTDIR=/host \
     -e TRAEFIK_NETWORK=wt_traefik-net \
-    -e TRAEFIK_ENTRYPOINT=https \
+    -e TRAEFIK_ENTRYPOINT=websecure \
     -e REGISTRY_USER=${registry_user} \
     -e REGISTRY_URL=https://registry.${domain} \
     -e REGISTRY_PASS=${registry_pass} \
     -e DOMAIN=${domain} \
+    -e WT_LICENSE_PATH="$PWD"/volumes/licenses \
+    -e MATLAB_FILE_INSTALLATION_KEY=${matlab_file_installation_key} \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/host \
     -v /var/cache/davfs2:/var/cache/davfs2 \

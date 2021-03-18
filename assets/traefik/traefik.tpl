@@ -1,47 +1,70 @@
-graceTimeOut = "10s"
-debug = false
-checkNewVersion = false
-logLevel = "INFO"
-
-# If set to true invalid SSL certificates are accepted for backends.
-# Note: This disables detection of man-in-the-middle attacks so should only be used on secure backend networks.
-# Optional
-# Default: false
-#
-# InsecureSkipVerify = true
-
-defaultEntryPoints = ["http", "https"]
-
 [entryPoints]
-  [entryPoints.http]
-  address = ":80"
-    [entryPoints.http.redirect]
-    entryPoint = "https"
-  [entryPoints.https]
-  address = ":443"
-    [entryPoints.https.tls]
-    MinVersion = "VersionTLS11"
-    CipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"]
+  [entryPoints.web]
+    address = ":80"
+    [entryPoints.web.http]
+      [entryPoints.web.http.redirections]
+        [entryPoints.web.http.redirections.entryPoint]
+          to = "websecure"
+          scheme = "https"
 
-[acme]
-email = "bgates@microsoft.com"   # FIXME
-storage = "/acme/acme.json"
-entryPoint = "https"
-acmeLogging = true
+  [entryPoints.websecure]
+    address = ":443"
 
-[acme.dnsChallenge]
-provider = "godaddy"
-delayBeforeCheck = 0
+[providers]
+  providersThrottleDuration = "2s"
+  [providers.docker]
+    watch = true
+    endpoint = "unix:///var/run/docker.sock"
+    exposedByDefault = true
+    swarmMode = true
+    swarmModeRefreshSeconds = "15s"
+    httpClientTimeout = "0s"
+    defaultRule = "Host(`{{ trimPrefix `/` .Name }}.${domain}`)"
 
-[[acme.domains]]
-main = "*.${domain}"
 
-[web]
-address = ":8080"
+[tls.options]
+  [tls.options.default]
+    minVersion = "VersionTLS10"
+    cipherSuites = [
+      "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+      "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305",
+      "TLS_RSA_WITH_AES_128_CBC_SHA",
+      "TLS_RSA_WITH_AES_256_CBC_SHA"
+   ]
 
-[docker]
-endpoint = "unix:///var/run/docker.sock"
-domain = "${domain}"
-watch = true
-exposedbydefault = true
-swarmmode = true
+[api]
+  debug = false
+  dashboard = true
+  insecure = true
+
+[log]
+  level = "DEBUG"
+
+[accessLog]
+  format = "json"
+  bufferingSize = 0
+  [accessLog.filters]
+    statusCodes = ["200", "300-302"]
+    retryAttempts = true
+    minDuration = "0s"
+  [accessLog.fields]
+    defaultMode = "keep"
+    [accessLog.fields.names]
+      ClientUsername = "drop"
+    [accessLog.fields.headers]
+      defaultMode = "keep"
+      [accessLog.fields.headers.names]
+        Authorization = "drop"
+        Content-Type = "keep"
+        User-Agent = "redact"
+
+[certificatesResolvers]
+  [certificatesResolvers.default]
+    [certificatesResolvers.default.acme]
+      email = "bgates@microsoft.com"
+      storage = "/acme/acme.json"
+      [certificatesResolvers.default.acme.dnsChallenge]
+        provider = "godaddy"
+        delayBeforeCheck = "30m0s"
+        #entryPoint = "https"

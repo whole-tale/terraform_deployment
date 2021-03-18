@@ -16,7 +16,7 @@ volumes:
 
 services:
   traefik:
-    image: traefik:alpine
+    image: traefik:v2.4
     ports:
       - "80:80"
       - "443:443"
@@ -32,6 +32,8 @@ services:
       - GODADDY_API_SECRET=${godaddy_api_secret}
     deploy:
       replicas: 1
+      labels:
+        - "traefik.enable=false"
       placement:
         constraints:
           - "node.role == manager"
@@ -93,10 +95,15 @@ services:
       replicas: 1
       labels:
         - "traefik.frontend.rule=Host:girder.${domain},data.${domain}"
-        - "traefik.port=8080"
         - "traefik.enable=true"
+        - "traefik.http.routers.girder.rule=Host(`girder.${domain}`) || Host(`data.${domain}`)"
+        - "traefik.http.routers.girder.entrypoints=websecure"
+        - "traefik.http.routers.girder.tls=true"
+        - "traefik.http.services.girder.loadbalancer.server.port=8080"
+        - "traefik.http.services.girder.loadbalancer.passhostheader=true"
         - "traefik.docker.network=wt_traefik-net"
-        - "traefik.frontend.passHostHeader=true"
+        - "traefik.http.middlewares.girder.forwardauth.address=http://girder:8080/api/v1/instance/authorize/"
+        - "traefik.http.middlewares.girder.forwardauth.trustforwardheader=true"
       placement:
         constraints:
           - node.labels.storage == 1
@@ -120,11 +127,13 @@ services:
     deploy:
       replicas: 1
       labels:
-        - "traefik.port=80"
-        - "traefik.frontend.rule=Host:dashboard.${domain}"
         - "traefik.enable=true"
+        - "traefik.http.routers.dashboard.rule=Host(`dashboard.${domain}`)"
+        - "traefik.http.routers.dashboard.entrypoints=websecure"
+        - "traefik.http.routers.dashboard.tls=true"
+        - "traefik.http.services.dashboard.loadbalancer.server.port=80"
+        - "traefik.http.services.dashboard.loadbalancer.passhostheader=true"
         - "traefik.docker.network=wt_traefik-net"
-        - "traefik.frontend.passHostHeader=true"
 
   registry:
     image: registry:2.6
@@ -141,10 +150,12 @@ services:
       replicas: 1
       labels:
         - "traefik.enable=true"
-        - "traefik.port=5000"
-        - "traefik.frontend.rule=Host:registry.${domain}"
+        - "traefik.http.routers.registry.rule=Host(`registry.${domain}`)"
+        - "traefik.http.routers.registry.entrypoints=websecure"
+        - "traefik.http.routers.registry.tls=true"
+        - "traefik.http.services.registry.loadbalancer.server.port=5000"
+        - "traefik.http.services.registry.loadbalancer.passhostheader=true"
         - "traefik.docker.network=wt_traefik-net"
-        - "traefik.frontend.passHostHeader=true"
       placement:
         constraints:
           - node.labels.storage == 1
