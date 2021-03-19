@@ -37,7 +37,8 @@ sudo bash -c "cat << EOF > /etc/docker/daemon.json
 {
    \"hosts\": [\"unix:///var/run/docker.sock\", \"tcp://${eth1_ipv4}:237\"],
    \"dns\": [\"8.8.8.8\", \"8.8.4.4\"],
-   \"mtu\": ${docker_mtu}
+   \"mtu\": ${docker_mtu},
+   \"experimental\": true
 }
 EOF"
 
