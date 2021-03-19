@@ -1,21 +1,21 @@
 resource "openstack_blockstorage_volume_v2" "homes-vol" {
   name = "${var.cluster_name}-homes-vol"
   description = "Shared volume for home directories"
-  size = "${var.nfs_volume_size}"
+  size = "${var.homes_volume_size}"
 }
 
 resource "openstack_blockstorage_volume_v2" "registry-vol" {
   depends_on = ["openstack_blockstorage_volume_v2.homes-vol"]
   name = "${var.cluster_name}-registry-vol"
   description = "Shared volume for Docker registry"
-  size = "${var.nfs_volume_size}"
+  size = "${var.registry_volume_size}"
 }
 
 resource "openstack_blockstorage_volume_v2" "dms-vol" {
   depends_on = ["openstack_blockstorage_volume_v2.registry-vol"]
   name = "${var.cluster_name}-dms-vol"
   description = "Shared volume for DMS Private Storage"
-  size = "${var.nfs_volume_size}"
+  size = "${var.dms_volume_size}"
 }
 
 resource "openstack_compute_instance_v2" "fileserver" {
