@@ -18,7 +18,7 @@ variable "ssh_key_file" {
 }
 
 variable "ssh_user_name" {
-    default = "core"
+    default = "ubuntu"
     description = "Image specific user"
 }
 
