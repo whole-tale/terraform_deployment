@@ -116,3 +116,28 @@ for img in images:
     img["config"]["environment"] = new_envs
     Image().save(img)
 ```
+
+### Deploying MATLAB and STATA
+
+Build `matlab-install:R2020b` with correct network license.
+
+From node with `matlab-install:R2020b` and `stata-install:16` images:
+```
+docker login registry.stage.wholetale.org
+docker push registry.stage.wholetale.org/matlab-install:R2020b
+docker push registry.stage.wholetale.org/stata-install:16
+```
+
+On each worker node:
+```
+docker login registry.stage.wholetale.org
+docker pull registry.stage.wholetale.org/matlab-install:R2020b
+docker tag registry.stage.wholetale.org/matlab-install:R2020b matlab-install:R2020b
+docker pull registry.stage.wholetale.org/stata-install:16
+docker tag registry.stage.wholetale.org/stata-install:16 stata-install:16
+```
+
+Copy stata licenses to each worker node:
+```
+scp -r licenses/ <node>:.
+```
