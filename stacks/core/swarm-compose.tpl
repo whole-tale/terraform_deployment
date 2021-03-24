@@ -86,10 +86,9 @@ services:
     environment:
       - DASHBOARD_URL=https://dashboard.${domain}
       - GOSU_USER=girder:girder
-      - "GOSU_CHOWN=/tmp/wt-home-dirs /tmp/wt-tale-dirs /tmp/ps"
+      - "GOSU_CHOWN=/tmp/data /tmp/ps"
     volumes:
-      - "/mnt/homes:/tmp/wt-home-dirs"
-      - "/mnt/homes:/tmp/wt-tale-dirs"
+      - "/mnt/homes:/tmp/data"
       - "/mnt/dms:/tmp/ps"
     deploy:
       replicas: 1
