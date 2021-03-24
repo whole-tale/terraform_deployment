@@ -20,7 +20,9 @@
     swarmModeRefreshSeconds = "15s"
     httpClientTimeout = "0s"
     defaultRule = "Host(`{{ trimPrefix `/` .Name }}.${domain}`)"
-
+  [providers.file]
+    filename="/etc/traefik/vocab.toml"
+    watch=true
 
 [tls.options]
   [tls.options.default]

@@ -6,6 +6,14 @@ data "template_file" "traefik" {
   }
 }
 
+data "template_file" "vocab" {
+  template = "${file("${path.module}/assets/traefik/vocab.tpl")}"
+
+  vars {
+    domain = "${var.domain}"
+  }
+}
+
 data "template_file" "stack" {
   template = "${file("${path.module}/stacks/core/swarm-compose.tpl")}"
 
