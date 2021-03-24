@@ -81,7 +81,7 @@ sudo add-apt-repository \
    stable"
 
 sudo apt-get update -y
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo apt-get install -y docker-ce=5:19.03.15~3-0~ubuntu-focal docker-ce-cli=5:19.03.15~3-0~ubuntu-focal containerd.io
 sudo usermod -aG docker ubuntu
 
 sudo docker swarm leave --force || /bin/true
