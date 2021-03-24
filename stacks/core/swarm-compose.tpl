@@ -122,7 +122,7 @@ services:
     networks:
       - traefik-net
     environment:
-      - GIRDER_API_URL=https://girder.${domain}
+      - GIRDER_API_URL=https://girder.${domain}/api/v1
       - DASHBOARD_URL=https://dashboard.${domain}
       - DATAONE_URL=${dataone_url}
     deploy:
