@@ -105,3 +105,14 @@ for i in Item().find({'dm': {'$exists': True}}):
     Item().save(i)
 ```
 
+
+## Remove `CSP_HOSTS` env var
+```
+from girder.plugins.wholetale.models.image import Image
+images = Image().find()
+for img in images:
+    envs = img["config"]["environment"]
+    new_envs = [env for env in envs if not env.startswith('CSP_HOSTS=')]
+    img["config"]["environment"] = new_envs
+    Image().save(img)
+```
