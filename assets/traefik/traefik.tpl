@@ -41,7 +41,7 @@
   insecure = true
 
 [log]
-  level = "DEBUG"
+  level = "INFO"
 
 [accessLog]
   format = "json"
