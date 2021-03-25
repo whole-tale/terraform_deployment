@@ -8,13 +8,21 @@ import os
 import pathlib
 import shutil
 import sys
+import time
 from requests.auth import HTTPBasicAuth
 
 
-api_url = "https://girder.stage.wholetale.org/api/v1"
+passwd = sys.argv[1]
+domain = sys.argv[2]
+
+
+print(f"Using domain {domain}")
+time.sleep(5)
+
+api_url = f"https://girder.{domain}/api/v1"
 
 r = requests.get(
-    api_url + "/user/authentication", auth=HTTPBasicAuth("admin", sys.argv[1])
+    api_url + "/user/authentication", auth=HTTPBasicAuth("admin", passwd)
 )
 r.raise_for_status()
 headers = {
@@ -75,9 +83,9 @@ print("Setting up Plugin")
 settings = [
     {
         "key": "core.cors.allow_origin",
-        "value": "https://dashboard.stage.wholetale.org",
+        "value": f"https://dashboard.{domain}",
     },
-    {"key": "core.cookie_domain", "value": ".stage.wholetale.org"},
+    {"key": "core.cookie_domain", "value": f".{domain}"},
     {"key": "wthome.homedir_root", "value": "/tmp/data/homes"},
     {"key": "wthome.taledir_root", "value": "/tmp/data/workspaces"},
     {"key": "wtversioning.runs_root", "value": "/tmp/data/runs"},
