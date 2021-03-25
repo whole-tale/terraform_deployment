@@ -1,5 +1,11 @@
 #!/bin/bash
 
+waitforapt(){
+  while fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do
+     echo "Waiting for apt lock..."
+     sleep 1
+  done
+}
 
 cat << EOF >> /home/ubuntu/.ssh/authorized_keys
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqtK80wInbOIbvuf3EhANdJxwMJTjm29E0PgxjEishZ0x9Wj+EmL3WvvZf7YFrB3IuJ0bMI7Cjq5ZpSPZ+qEZgTfm4oKZgKJsnnynFibeizH2aN9YgbdIJeIiE0kF6v/fFVQEtIwX5oO3TUMYBP7Mecl+nRibudAX/TK08oZzt4hdOrmbUZ5pmzaCSAfabqDRhi8r5GVVnEHcfGvKv7P+z+O4pySCURF/XozmjlPHv8hl4pqAx9eK6OylB/FH5+2jNIkG5vJMWs1bO4AdmE+mqeefHmn6CH55bNUGFH6Oqc4qGnRapjp5tdiaW4jc8DinLqw1ScEUraH+KjzqrN9mD xarth@shakuras
@@ -50,7 +56,9 @@ ExecStart=/usr/bin/dockerd --containerd=/run/containerd/containerd.sock
 EOF"
 
 # Install required packages
+waitforapt
 sudo apt-get update -y 
+waitforapt
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     apt-transport-https \
     ca-certificates \
@@ -73,14 +81,18 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 
 # Install Docker
+waitforapt
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - 
 
+waitforapt
 sudo add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
 
+waitforapt
 sudo apt-get update -y
+waitforapt
 sudo apt-get install -y docker-ce=5:19.03.15~3-0~ubuntu-focal docker-ce-cli=5:19.03.15~3-0~ubuntu-focal containerd.io
 sudo usermod -aG docker ubuntu
 
