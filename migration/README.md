@@ -61,6 +61,7 @@ from girder.models.file import File
 from girder.models.folder import Folder
 from girder.models.item import Item
 from girder.models.user import User
+from girder.plugins.wholetale.models.tale import Tale
 
 old_base = Assetstore().load("596448521801c10001a4c5fb")
 Assetstore().remove(old_base)
@@ -91,10 +92,17 @@ for home in Folder().find({"name": "Home"}):
 for workspace in Folder().find({"meta.taleId": {"$exists": True}}):
     Folder().clean(workspace)
     tale_id = str(workspace["meta"]["taleId"])
+    tale = Tale().load(tale_id, force=True)
+    if not tale:
+        Folder().remove(workspace)
+        continue
     workspace.update(
         {
             "fsPath": f"{workspace_base}/{tale_id[:1]}/{tale_id}",
-            "isMapping": True
+            "isMapping": True,
+            "access": tale["access"],
+            "public": tale["public"],
+            "publicFlags": tale.get("publicFlags", []),
         }
     )
     Folder().save(workspace)
