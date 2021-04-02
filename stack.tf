@@ -6,6 +6,14 @@ data "template_file" "traefik" {
   }
 }
 
+data "template_file" "vocab" {
+  template = "${file("${path.module}/assets/traefik/vocab.tpl")}"
+
+  vars {
+    domain = "${var.domain}"
+  }
+}
+
 data "template_file" "stack" {
   template = "${file("${path.module}/stacks/core/swarm-compose.tpl")}"
 
@@ -104,11 +112,10 @@ resource "null_resource" "deploy_stack" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/ubuntu/wholetale/start-worker.sh",
-      "/home/ubuntu/wholetale/start-worker.sh ${var.domain} manager ${var.registry_user} ${var.registry_pass} ${var.version}"
+      "/home/ubuntu/wholetale/start-worker.sh ${var.domain} manager ${var.registry_user} ${var.registry_pass} ${var.version} ${var.matlab_file_installation_key}"
     ]
   }
 }
-
 
 resource "null_resource" "start_worker" {
   count = "${var.num_workers}"

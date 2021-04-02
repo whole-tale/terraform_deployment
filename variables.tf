@@ -18,7 +18,7 @@ variable "ssh_key_file" {
 }
 
 variable "ssh_user_name" {
-    default = "core"
+    default = "ubuntu"
     description = "Image specific user"
 }
 
@@ -67,9 +67,19 @@ variable "globus_client_secret" {
     description = "Globus client secret"
 }
 
-variable "nfs_volume_size" {
+variable "homes_volume_size" {
     default =  50
-    description = "Fileserver volume size in GB"
+    description = "Home volume size in GB"
+}
+
+variable "registry_volume_size" {
+    default =  50
+    description = "Registry volume size in GB"
+}
+
+variable "dms_volume_size" {
+    default =  50
+    description = "DMS volume size in GB"
 }
 
 variable "docker_volume_size" {
@@ -95,6 +105,11 @@ variable "godaddy_api_key" {
 variable "godaddy_api_secret" {
    default = ""
    description = "API secret for GoDaddy DNS"
+}
+
+variable "matlab_file_installation_key" {
+   default = ""
+   description = "MATLAB file installation key"
 }
 
 variable "version" {
