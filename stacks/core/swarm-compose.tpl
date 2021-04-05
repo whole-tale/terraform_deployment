@@ -90,6 +90,12 @@ services:
     volumes:
       - "/mnt/homes:/tmp/data"
       - "/mnt/dms:/tmp/ps"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+        compress: "true"
     deploy:
       replicas: 1
       labels:
