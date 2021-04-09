@@ -9,11 +9,11 @@ separate the contents of `homes` and `workspaces`.
 
 ```
 ssh <nfs>
-export BACKUP_DATE=<date of backup>
 docker run -it --network wt_mongo -v /mnt/homes:/backup -v /home/ubuntu/rclone/:/conf wholetale/backup bash
+export BACKUP_DATE=<date of backup>
 rclone --config /conf/rclone.conf ls backup:WT
-rclone --config /conf/rclone.conf copy backup:WT/wt-prod-a/20210318/mongodump-${BACKUP_DATE}.tgz /tmp
-rclone --config /conf/rclone.conf copy backup:WT/wt-prod-a/20210318/home-${BACKUP_DATE}.tgz /tmp
+rclone --config /conf/rclone.conf copy backup:WT/wt-prod-a/${BACKUP_DATE}/mongodump-${BACKUP_DATE}.tgz /tmp
+rclone --config /conf/rclone.conf copy backup:WT/wt-prod-a/${BACKUP_DATE}/home-${BACKUP_DATE}.tgz /tmp
 
 mongo_host="rs1/wt_mongo1:27017,wt_mongo2:27017,wt_mongo3:27017"
 mongorestore --drop --host=$mongo_host --gzip --archive=/tmp/mongodump-${BACKUP_DATE}.tgz
@@ -106,6 +106,15 @@ for workspace in Folder().find({"meta.taleId": {"$exists": True}}):
         }
     )
     Folder().save(workspace)
+
+# Create versions and runs folders for old tales
+from girder.plugins.wholetale.models.tale import Tale
+from bson import ObjectId
+from girder import events
+
+for tale in list(Tale().find()):  
+    event = events.trigger("model.tale.save.created", info=tale)
+
 
 # Drop DMS cache - also not necessary on stage/prod provided that dms data was copied
 for i in Item().find({'dm': {'$exists': True}}):
