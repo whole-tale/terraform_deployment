@@ -27,7 +27,7 @@ docker run \
     -e REGISTRY_PASS=${registry_pass} \
     -e DOMAIN=${domain} \
     -e WT_LICENSE_PATH="$PWD"/licenses \
-    -e MATLAB_FILE_INSTALLATION_KEY=${matlab_file_installation_key} \
+    -e MATLAB_FILE_INSTALLATION_KEY=${matlab_installation_key} \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     -v /:/host \
     -v /var/cache/davfs2:/var/cache/davfs2 \
