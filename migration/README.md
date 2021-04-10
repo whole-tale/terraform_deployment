@@ -1,10 +1,11 @@
 # Migrating from v0.9 to v1.0
 
+Instructions for migrating from v0.9 to v1.0 including
+staging deployment instructions.
 
-## (Staing) Restore from backup
+## (Staging) Restore from backup
 
-After provisioning, `ssh` to the NFS node. For v1.0, we also 
-separate the contents of `homes` and `workspaces`.
+For staging only. After provisioning, `ssh` to the NFS node. 
 
 
 ```
@@ -26,10 +27,12 @@ mv homes/6 workspaces/
 chown -R 999:999 .
 ```
 
+Prod note: For v1.0, contents of `homes` and `workspaces` must be separated.
+
 ## (Staging) Change admin password
 
 ```
-$ docker exec -ti $(docker ps --filter=name=wt_girder -q) bash
+$ docker exec -ti --user girder $(docker ps --filter=name=wt_girder -q) bash
 # girder-shell
 
 from girder.models.user import User
@@ -48,7 +51,7 @@ for instance in instances:
 ## Run the migration script
 
 ```
-python3 scripts/migrate_v1.0.py <admin_password>
+python3 migrate_v1.0.py <admin_password>
 ```
 
 ## Migrate virtual resources
@@ -120,11 +123,9 @@ for tale in list(Tale().find()):
 for i in Item().find({'dm': {'$exists': True}}):
     i.pop('dm')
     Item().save(i)
-```
 
 
-## Remove `CSP_HOSTS` env var
-```
+# Remove `CSP_HOSTS` env var
 from girder.plugins.wholetale.models.image import Image
 images = Image().find()
 for img in images:
@@ -134,7 +135,7 @@ for img in images:
     Image().save(img)
 ```
 
-### Deploying MATLAB and STATA
+## Deploying MATLAB and STATA
 
 Build `matlab-install:R2020b` with correct network license.
 
@@ -147,14 +148,37 @@ docker push registry.stage.wholetale.org/stata-install:16
 
 On each worker node:
 ```
-docker login registry.stage.wholetale.org
-docker pull registry.stage.wholetale.org/matlab-install:R2020b
-docker tag registry.stage.wholetale.org/matlab-install:R2020b matlab-install:R2020b
-docker pull registry.stage.wholetale.org/stata-install:16
-docker tag registry.stage.wholetale.org/stata-install:16 stata-install:16
+for host in <hosts>:
+do
+  scp -r ~/.docker $host:.
+  ssh $host docker pull registry.stage.wholetale.org/stata-install:16;
+  ssh $host docker tag registry.stage.wholetale.org/stata-install:16 stata-install:16;
+  ssh $host docker pull registry.stage.wholetale.org/matlab-install:R2020b
+  ssh $host docker tag registry.stage.wholetale.org/matlab-install:R2020b matlab-install:R2020b
+done
 ```
 
 Copy stata licenses to each worker node:
 ```
-scp -r licenses/ <node>:.
+for host in <hosts>:
+do
+  scp -r licenses/ <node>:.
+done
 ```
+
+Cache base image on each node
+```
+for host in <hosts>:
+do
+  docker run \
+    --privileged \
+    -v /var/run/docker.sock:/var/run/docker.sock:ro \
+    wholetale/repo2docker_wholetale:latest \
+    jupyter-repo2docker \
+      --config="/wholetale/repo2docker_config.py" \
+      --target-repo-dir="/home/jovyan/work/" \
+done
+      --user-id=1000 --user-name=jovyan \
+      --no-clean --no-run --image-name base /tmp
+```
+
