@@ -132,6 +132,7 @@ services:
       - DASHBOARD_URL=https://dashboard.${domain}
       - DATAONE_URL=${dataone_url}
       - AUTH_PROVIDER=Globus
+      - RTD_URL=https://wholetale.readthedocs.io/en/stable
     deploy:
       replicas: 1
       labels:
