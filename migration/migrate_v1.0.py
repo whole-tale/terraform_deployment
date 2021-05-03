@@ -186,7 +186,8 @@ i_params = {
         'urlPath': 'matlab/index.html',
         'buildpack': 'MatlabBuildPack',
         'user': 'jovyan',
-        'csp': "default-src 'self' *.mathworks.com:*; style-src 'self' 'unsafe-inline' *.mathworks.com:*; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.mathworks.com:*; img-src 'self' *.mathworks.com:* data:; frame-ancestors 'self' *.mathworks.com:* dashboard.local.wholetale.org; frame-src 'self' *.mathworks.com:*; connect-src 'self' *.mathworks.com:* wss://localhost:* wss://127.0.0.1:*"
+        'csp': "default-src 'self' *.mathworks.com:*; style-src 'self' 'unsafe-inline' *.mathworks.com:*; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.mathworks.com:*; img-src 'self' *.mathworks.com:* data:; frame-ancestors 'self' *.mathworks.com:* dashboard.wholetale.org dashboard.stage.wholetale.org; frame-src 'self' *.mathworks.com:*; connect-src 'self' *.mathworks.com:* wss://localhost:* wss://127.0.0.1:*"
+
     }),
     'icon': (
         'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/'
