@@ -129,10 +129,11 @@ for i in Item().find({'dm': {'$exists': True}}):
 from girder.plugins.wholetale.models.image import Image
 images = Image().find()
 for img in images:
-    envs = img["config"]["environment"]
-    new_envs = [env for env in envs if not env.startswith('CSP_HOSTS=')]
-    img["config"]["environment"] = new_envs
-    Image().save(img)
+    if "environment" in img["config"]:
+      envs = img["config"]["environment"]
+      new_envs = [env for env in envs if not env.startswith('CSP_HOSTS=')]
+      img["config"]["environment"] = new_envs
+      Image().save(img)
 ```
 
 ## Deploying MATLAB and STATA
