@@ -85,6 +85,11 @@ resource "null_resource" "deploy_stack" {
   }
 
   provisioner "file" {
+    content      = "${data.template_file.vocab.rendered}"
+    destination = "/home/ubuntu/wholetale/traefik/vocab.toml"
+  }
+
+  provisioner "file" {
     source = "scripts/start-worker.sh"
     destination = "/home/ubuntu/wholetale/start-worker.sh"
   }
