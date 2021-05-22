@@ -134,8 +134,9 @@ i_params = {
         'Matlab_Logo.png/267px-Matlab_Logo.png'
     ),
     'iframe': True,
-    'name': 'MATLAB (Jupyter Kernel)',
-    'public': True
+    'name': 'MATLAB (Jupyter Kernel) [R2020b]',
+    'public': True,
+    'idleTimeout': 120
 }
 r = requests.post(api_url + '/image', headers=headers,
                   params=i_params)
@@ -163,8 +164,9 @@ i_params = {
         'Matlab_Logo.png/267px-Matlab_Logo.png'
     ),
     'iframe': True,
-    'name': 'MATLAB (Linux Desktop)',
-    'public': True
+    'name': 'MATLAB (Linux Desktop) [R2020b]',
+    'public': True,
+    'idleTimeout': 120
 }
 r = requests.post(api_url + '/image', headers=headers,
                   params=i_params)
@@ -194,8 +196,9 @@ i_params = {
         'Matlab_Logo.png/267px-Matlab_Logo.png'
     ),
     'iframe': True,
-    'name': 'MATLAB (Desktop)',
-    'public': True
+    'name': 'MATLAB (Web Desktop) [R2020b]',
+    'public': True,
+    'idleTimeout': 120
 }
 r = requests.post(api_url + '/image', headers=headers,
                   params=i_params)
