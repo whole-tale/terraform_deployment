@@ -172,3 +172,37 @@ services:
       placement:
         constraints:
           - node.labels.storage == 1
+
+  scheduler:
+    image: wholetale/gwvolman:${version}
+    entrypoint: /gwvolman/scheduler-entrypoint.sh
+    networks:
+      - celery
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=false"
+      placement:
+        constraints:
+          - "node.role == manager"
+
+  instance-errors:
+    image: wholetale/custom-errors:${version}
+    networks:
+      - traefik-net
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.instance-errors.rule=HostRegexp(`{host:tmp-.*}`)"
+        - "traefik.http.routers.instance-errors.entrypoints=websecure"
+        - "traefik.http.routers.instance-errors.tls=true"
+        - "traefik.http.routers.instance-errors.priority=1"
+        - "traefik.http.routers.instance-errors.middlewares=error-pages-middleware"
+        - "traefik.http.middlewares.error-pages-middleware.errors.status=400-599"
+        - "traefik.http.middlewares.error-pages-middleware.errors.service=instance-errors"
+        - "traefik.http.middlewares.error-pages-middleware.errors.query=/{status}.html"
+        - "traefik.http.services.instance-errors.loadbalancer.server.port=80"
+        - "traefik.docker.network=wt_traefik-net"
