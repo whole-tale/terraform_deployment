@@ -134,8 +134,9 @@ i_params = {
         'Matlab_Logo.png/267px-Matlab_Logo.png'
     ),
     'iframe': True,
-    'name': 'MATLAB (Jupyter Kernel)',
-    'public': True
+    'name': 'MATLAB (Jupyter Kernel) [R2020b]',
+    'public': True,
+    'idleTimeout': 120
 }
 r = requests.post(api_url + '/image', headers=headers,
                   params=i_params)
@@ -163,8 +164,9 @@ i_params = {
         'Matlab_Logo.png/267px-Matlab_Logo.png'
     ),
     'iframe': True,
-    'name': 'MATLAB (Linux Desktop)',
-    'public': True
+    'name': 'MATLAB (Linux Desktop) [R2020b]',
+    'public': True,
+    'idleTimeout': 120
 }
 r = requests.post(api_url + '/image', headers=headers,
                   params=i_params)
@@ -186,15 +188,17 @@ i_params = {
         'urlPath': 'matlab/index.html',
         'buildpack': 'MatlabBuildPack',
         'user': 'jovyan',
-        'csp': "default-src 'self' *.mathworks.com:*; style-src 'self' 'unsafe-inline' *.mathworks.com:*; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.mathworks.com:*; img-src 'self' *.mathworks.com:* data:; frame-ancestors 'self' *.mathworks.com:* dashboard.local.wholetale.org; frame-src 'self' *.mathworks.com:*; connect-src 'self' *.mathworks.com:* wss://localhost:* wss://127.0.0.1:*"
+        'csp': "default-src 'self' *.mathworks.com:*; style-src 'self' 'unsafe-inline' *.mathworks.com:*; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.mathworks.com:*; img-src 'self' *.mathworks.com:* data:; frame-ancestors 'self' *.mathworks.com:* dashboard.wholetale.org dashboard.stage.wholetale.org; frame-src 'self' *.mathworks.com:*; connect-src 'self' *.mathworks.com:* wss://localhost:* wss://127.0.0.1:*"
+
     }),
     'icon': (
         'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/'
         'Matlab_Logo.png/267px-Matlab_Logo.png'
     ),
     'iframe': True,
-    'name': 'MATLAB (Desktop)',
-    'public': True
+    'name': 'MATLAB (Web Desktop) [R2020b]',
+    'public': True,
+    'idleTimeout': 120
 }
 r = requests.post(api_url + '/image', headers=headers,
                   params=i_params)

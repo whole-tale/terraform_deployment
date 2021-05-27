@@ -129,10 +129,39 @@ for i in Item().find({'dm': {'$exists': True}}):
 from girder.plugins.wholetale.models.image import Image
 images = Image().find()
 for img in images:
-    envs = img["config"]["environment"]
-    new_envs = [env for env in envs if not env.startswith('CSP_HOSTS=')]
-    img["config"]["environment"] = new_envs
-    Image().save(img)
+    if "environment" in img["config"]:
+      envs = img["config"]["environment"]
+      new_envs = [env for env in envs if not env.startswith('CSP_HOSTS=')]
+      img["config"]["environment"] = new_envs
+      Image().save(img)
+
+# Update auth provider docs_href, change D1 to apikey
+from girder.models.setting import Setting
+external = Setting().get("wholetale.external_auth_providers")
+external[1]["docs_href"]= "https://{siteUrl}/account/settings/applications/tokens/new/"
+external[2]["docs_href"]= "https://{siteUrl}/dataverseuser.xhtml?selectTab=apiTokenTab"
+external[3]["docs_href"]= "https://{siteUrl}/portal/oauth?action=start&target=https%3A//{siteUrl}/portal/token"
+external[3]["name"] = "dataone"
+external[3]["fullName"] = "DataONE"
+external[3]["type"] = "apikey"
+Setting().set("wholetale.external_auth_providers", external)
+
+pub = Setting().get("wholetale.publisher_repositories")
+ pub[2]["auth_provider"] = "dataone"
+Setting().set("wholetale.publisher_repositories", pub)
+
+apikey = Setting().get("wholetale.external_apikey_groups")
+
+apikey.append({
+                "name": "dataone",
+                "targets": [
+                    "cn-stage-2.test.dataone.org",
+                    "cn.dataone.org",
+                ]
+            })
+Setting().set("wholetale.external_apikey_groups", apikey)
+
+
 ```
 
 ## Deploying MATLAB and STATA

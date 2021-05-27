@@ -118,6 +118,6 @@ variable "version" {
 }
 
 variable "dataone_url" {
-   default = "https://dev.nceas.ucsb.edu/cn/v2"
+   default = "https://cn-stage-2.test.dataone.org/cn"
    description = "DataONE member node URL"
 }
