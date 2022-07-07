@@ -74,4 +74,23 @@ resource "null_resource" "provision_worker" {
   }
 }
 
+resource "null_resource" "worker_nfs_mounts" {
+  depends_on = ["null_resource.provision_fileserver"]
+  connection {
+    user = "${var.ssh_user_name}"
+    private_key = "${file("${var.ssh_key_file}")}"
+    host = "${element(openstack_networking_floatingip_v2.swarm_worker_ip.*.address, count.index)}"
+  }
 
+  provisioner "file" {
+    source = "scripts/nfs-init.sh"
+    destination = "/home/ubuntu/wholetale/nfs-init.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/ubuntu/wholetale/nfs-init.sh",
+      "sudo /home/ubuntu/wholetale/nfs-init.sh  ${openstack_compute_instance_v2.fileserver.access_ip_v4}"
+    ]
+  }
+}

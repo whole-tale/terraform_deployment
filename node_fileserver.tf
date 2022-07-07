@@ -107,6 +107,11 @@ resource "null_resource" "provision_fileserver" {
   }
 
   provisioner "file" {
+    source = "scripts/nfs-export.sh"
+    destination = "/home/ubuntu/wholetale/nfs-export.sh"
+  }
+
+  provisioner "file" {
     source = "scripts/init-backup.sh"
     destination = "/home/ubuntu/wholetale/init-backup.sh"
   }
@@ -119,11 +124,13 @@ resource "null_resource" "provision_fileserver" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/ubuntu/wholetale/fs-init.sh",
+      "chmod +x /home/ubuntu/wholetale/nfs-export.sh",
       "chmod +x /home/ubuntu/wholetale/init-backup.sh",
       "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.registry-vol.device} -m /mnt/registry",
       "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.homes-vol.device} -m /mnt/homes",
       "sudo /home/ubuntu/wholetale/fs-init.sh -v -d ${openstack_compute_volume_attach_v2.dms-vol.device} -m /mnt/dms",
-      "sudo /home/ubuntu/wholetale/init-backup.sh ${var.cluster_name}"
+      "sudo /home/ubuntu/wholetale/nfs-export.sh ${var.internal_subnet} ${var.external_subnet}",
+      "sudo /home/ubuntu/wholetale/init-backup.sh ${var.cluster_name}",
     ]
   }
 

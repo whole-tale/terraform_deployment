@@ -73,6 +73,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libjpeg-dev \
     libpython3-dev \
     libssl-dev \
+    nfs-common \
     python3 \
     python3-pip \
     software-properties-common \
