@@ -21,7 +21,7 @@ resource "openstack_blockstorage_volume_v2" "dms-vol" {
 resource "openstack_compute_instance_v2" "fileserver" {
   name = "${var.cluster_name}-nfs"
   image_name = "${var.image}"
-  flavor_name = "${var.flavor}"
+  flavor_name = "${var.flavor_fileserver}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
 
   network {

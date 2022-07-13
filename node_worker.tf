@@ -2,7 +2,7 @@ resource "openstack_compute_instance_v2" "swarm_worker" {
   count = "${var.num_workers}"
   name = "${format("${var.cluster_name}-%02d", count.index + 1)}"
   image_name = "${var.image}"
-  flavor_name = "${var.flavor}"
+  flavor_name = "${var.flavor_worker}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
 
   network {

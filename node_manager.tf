@@ -1,7 +1,7 @@
 resource "openstack_compute_instance_v2" "swarm_manager" {
   name = "${var.cluster_name}-00"
   image_name = "${var.image}"
-  flavor_name = "${var.flavor}"
+  flavor_name = "${var.flavor_manager}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
 
   network {

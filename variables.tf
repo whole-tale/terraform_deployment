@@ -7,8 +7,18 @@ variable "image" {
     description = "openstack image list : Name"
 }
 
-variable "flavor" {
+variable "flavor_fileserver" {
     default = "m3.quad"
+    description = "openstack flavor list : Name"
+}
+
+variable "flavor_manager" {
+    default = "m3.quad"
+    description = "openstack flavor list : Name"
+}
+
+variable "flavor_worker" {
+    default = "m3.medium"
     description = "openstack flavor list : Name"
 }
 
