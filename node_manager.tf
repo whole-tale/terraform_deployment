@@ -1,7 +1,7 @@
 resource "openstack_compute_instance_v2" "swarm_manager" {
   name = "${var.cluster_name}-00"
   image_name = "${var.image}"
-  flavor_name = "${var.flavor}"
+  flavor_name = "${var.flavor_manager}"
   key_pair = "${openstack_compute_keypair_v2.ssh_key.name}"
 
   network {
@@ -81,6 +81,27 @@ resource "null_resource" "provision_manager" {
     inline = [
       "chmod +x /home/ubuntu/wholetale/post-setup-manager.sh",
       "/home/ubuntu/wholetale/post-setup-manager.sh"
+    ]
+  }
+}
+
+resource "null_resource" "manager_nfs_mounts" {
+  depends_on = ["null_resource.provision_fileserver"]
+  connection {
+    user = "${var.ssh_user_name}"
+    private_key = "${file("${var.ssh_key_file}")}"
+    host = "${openstack_networking_floatingip_v2.swarm_manager_ip.address}"
+  }
+
+  provisioner "file" {
+    source = "scripts/nfs-init.sh"
+    destination = "/home/ubuntu/wholetale/nfs-init.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/ubuntu/wholetale/nfs-init.sh",
+      "sudo /home/ubuntu/wholetale/nfs-init.sh  ${openstack_compute_instance_v2.fileserver.access_ip_v4}"
     ]
   }
 }

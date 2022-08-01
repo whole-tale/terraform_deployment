@@ -7,8 +7,18 @@ variable "image" {
     description = "openstack image list : Name"
 }
 
-variable "flavor" {
-    default = "m1.medium"
+variable "flavor_fileserver" {
+    default = "m3.quad"
+    description = "openstack flavor list : Name"
+}
+
+variable "flavor_manager" {
+    default = "m3.quad"
+    description = "openstack flavor list : Name"
+}
+
+variable "flavor_worker" {
+    default = "m3.medium"
     description = "openstack flavor list : Name"
 }
 
@@ -23,27 +33,27 @@ variable "ssh_user_name" {
 }
 
 variable "external_gateway" {
-    default = "bef0fe11-1646-4826-9776-3afdf95e53b9"
+    default = "3fe22c05-6206-4db2-9a13-44f04b6796e6"
     description = "openstack network list (network with public interfaces)"
 }
 
 variable "pool" {
-    default = "ext-net"
+    default = "public"
     description = "Network pool for assigning floating_ips"
 }
 
 variable "external_subnet" {
-    default = "192.168.99.0/24"
+    default = "192.168.102.0/24"
     description = "Default subnet for external network"
 }
 
 variable "internal_subnet" {
-    default = "192.168.149.0/24"
+    default = "192.168.152.0/24"
     description = "Default subnet for external network"
 }
 
 variable "cluster_name" {
-    default = "wt-dev"
+    default = "wt-prod"
     description = "Cluster name"
 }
 
@@ -67,33 +77,33 @@ variable "globus_client_secret" {
     description = "Globus client secret"
 }
 
-variable "homes_volume_size" {
-    default =  50
-    description = "Home volume size in GB"
-}
-
-variable "registry_volume_size" {
-    default =  50
-    description = "Registry volume size in GB"
-}
-
 variable "dms_volume_size" {
-    default =  50
+    default = 100
     description = "DMS volume size in GB"
 }
 
+variable "registry_volume_size" {
+    default = 1000
+    description = "Registry volume size in GB"
+}
+
+variable "homes_volume_size" {
+    default = 1000 
+    description = "Homes volume size in GB"
+}
+
 variable "docker_volume_size" {
-    default =  50
-    description = "Docker volume size in GB"
+    default = 500
+    description = "Fileserver volume size in GB"
 }
 
 variable "registry_user" {
-    default = "fido"
+    default = ""
     description = "Default user used in the internal docker registry"
 }
 
 variable "registry_pass" {
-    default = "10DSObv0Awqaa8Wz4d3K"
+    default = ""
     description = "Random password for the user used in the internal docker registry"
 }
 
@@ -113,11 +123,11 @@ variable "matlab_file_installation_key" {
 }
 
 variable "version" {
-   default = "latest"
+   default = "v1.1"
    description = "Docker component versions"
 }
 
 variable "dataone_url" {
-   default = "https://cn-stage-2.test.dataone.org/cn"
+   default = "https://dev.nceas.ucsb.edu/cn/v2"
    description = "DataONE member node URL"
 }
