@@ -18,8 +18,12 @@ services:
   traefik:
     image: traefik:v2.4
     ports:
-      - "80:80"
-      - "443:443"
+      - target: 80
+        published: 80
+        mode: host
+      - target: 443
+        published: 443
+        mode: host
       - "8080:8080"
     networks:
       - traefik-net
