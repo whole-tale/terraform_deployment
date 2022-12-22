@@ -89,8 +89,10 @@ services:
       - mongo
     environment:
       - DASHBOARD_URL=https://dashboard.${domain}
-      - GOSU_USER=girder:girder
+      - GOSU_USER=girder:girder:999
       - "GOSU_CHOWN=/tmp/data /tmp/ps"
+      - HOSTDIR=/
+      - DOMAIN=${domain}
     volumes:
       - "/mnt/homes:/tmp/data"
       - "/mnt/dms:/tmp/ps"
@@ -202,22 +204,6 @@ services:
       placement:
         constraints:
           - node.labels.storage == 1
-
-
-  scheduler:
-    image: wholetale/gwvolman:${version}
-    entrypoint: /gwvolman/scheduler-entrypoint.sh
-    networks:
-      - celery
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    deploy:
-      replicas: 1
-      labels:
-        - "traefik.enable=false"
-      placement:
-        constraints:
-          - "node.role == manager"
 
   instance-errors:
     image: wholetale/custom-errors:${version}
