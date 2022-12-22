@@ -94,6 +94,8 @@ services:
     volumes:
       - "/mnt/homes:/tmp/data"
       - "/mnt/dms:/tmp/ps"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/tmp:/tmp"
     logging:
       driver: "json-file"
       options:
@@ -177,6 +179,31 @@ services:
         constraints:
           - node.labels.storage == 1
 
+  images:
+    image: registry:2.6
+    networks:
+      - traefik-net
+    volumes:
+      - "/mnt/registry:/var/lib/registry:ro"
+      - "/mnt/registry/auth:/auth:ro"
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.images.rule=Host(`images.${domain}`)"
+        - "traefik.http.routers.images.entrypoints=websecure"
+        - "traefik.http.routers.images.tls=true"
+        - "traefik.http.routers.images.rule=Method(`GET`)"
+        - "traefik.http.routers.images.tls.certresolver=default"
+        - "traefik.http.routers.images.tls.domains[0].main=*.${domain}"
+        - "traefik.http.services.images.loadbalancer.server.port=5000"
+        - "traefik.http.services.images.loadbalancer.passhostheader=true"
+        - "traefik.docker.network=wt_traefik-net"
+      placement:
+        constraints:
+          - node.labels.storage == 1
+
+
   scheduler:
     image: wholetale/gwvolman:${version}
     entrypoint: /gwvolman/scheduler-entrypoint.sh
@@ -210,3 +237,17 @@ services:
         - "traefik.http.middlewares.error-pages-middleware.errors.query=/{status}.html"
         - "traefik.http.services.instance-errors.loadbalancer.server.port=80"
         - "traefik.docker.network=wt_traefik-net"
+
+  logger:
+    image: wholetale/instance_logger:latest
+    networks:
+      - celery
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=false"
+      placement:
+        constraints:
+          - "node.role == manager"
